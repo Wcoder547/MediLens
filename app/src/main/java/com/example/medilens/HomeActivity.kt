@@ -12,7 +12,7 @@ class HomeActivity : ComponentActivity() {
         val userName = intent.getStringExtra("USER_NAME") ?: "User"
         val userEmail = intent.getStringExtra("USER_EMAIL") ?: ""
 
-        findViewById<TextView>(R.id.welcomeText).text =
-            "Welcome, $userName\nEmail: $userEmail"
+//        findViewById<TextView>(R.id.welcomeText).text =
+//            "Welcome, $userName\nEmail: $userEmail"
     }
 }

@@ -170,6 +170,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
     // 🔹 Step 3: Authenticate with Firebase using Google ID token
     private fun firebaseAuthWithGoogle(idToken: String) {
         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)

@@ -96,6 +96,7 @@
             android:text="You're all clear for today!"
             android:textColor="@color/subtext"
             android:textSize="14sp"
+            android:shadowColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imgIllustration" />

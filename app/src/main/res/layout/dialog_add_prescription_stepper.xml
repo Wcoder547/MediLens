@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:background="#FAFAFA">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <!-- Transparent overlay for outside clicks -->
+    <View
+        android:id="@+id/overlay_outside_click"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="@android:color/white">
+
+        <!-- Progress indicator -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/stepProgress"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginBottom="20dp"
+            app:indicatorColor="#4CAF50"
+            app:trackColor="#E0E0E0"
+            app:showAnimationBehavior="inward"
+            android:progress="25" />
+
+        <!-- STEP 1: Prescription Name -->
+        <LinearLayout
+            android:id="@+id/step1Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Prescription name"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:hintTextColor="#666666">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPrescriptionName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter prescription name"
+                    android:inputType="textCapWords"
+                    android:textColor="#1A1A1A"
+                    android:textSize="16sp"
+                    android:padding="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- STEP 2: Drug Details -->
+        <LinearLayout
+            android:id="@+id/step2Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Drug details"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:hintTextColor="#666666">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDrugName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Drug/medicine name"
+                    android:inputType="textCapWords"
+                    android:textColor="#1A1A1A"
+                    android:textSize="16sp"
+                    android:padding="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:hintTextColor="#666666">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDosageQuantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Dosage per intake"
+                    android:inputType="text"
+                    android:textColor="#1A1A1A"
+                    android:textSize="16sp"
+                    android:padding="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:hintTextColor="#666666">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTotalQuantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Total Dose quantity"
+                    android:inputType="numberDecimal"
+                    android:textColor="#1A1A1A"
+                    android:textSize="16sp"
+                    android:padding="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- STEP 3: Schedule -->
+        <LinearLayout
+            android:id="@+id/step3Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Schedule"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"
+                android:layout_marginBottom="12dp" />
+
+            <RadioGroup
+                android:id="@+id/rgFrequency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp">
+
+                <RadioButton
+                    android:id="@+id/rbOnceDaily"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Daily · 1 time"
+                    android:textSize="16sp"
+                    android:textColor="#1A1A1A"
+                    android:buttonTint="#4CAF50"
+                    android:layout_marginBottom="12dp" />
+
+                <RadioButton
+                    android:id="@+id/rbTwiceDaily"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Daily · 2 times"
+                    android:textSize="16sp"
+                    android:textColor="#1A1A1A"
+                    android:buttonTint="#4CAF50"
+                    android:layout_marginBottom="12dp" />
+
+                <RadioButton
+                    android:id="@+id/rbThriceDaily"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Daily · 3 times"
+                    android:textSize="16sp"
+                    android:textColor="#1A1A1A"
+                    android:buttonTint="#4CAF50" />
+            </RadioGroup>
+
+            <!-- BEAUTIFUL TIME SELECTION SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_time_picker_section"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Select medication times"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#2196F3"
+                    android:layout_marginBottom="20dp" />
+
+                <!-- Time 1 - Always Visible -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#2196F3"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="20dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            android:tint="#2196F3"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvTime1Label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="First dose"
+                            android:textColor="#1A1A1A"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTime1"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Select time"
+                            android:textSize="16sp"
+                            android:textColor="#2196F3"
+                            app:cornerRadius="8dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+
+                <!-- Time 2 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#2196F3"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="20dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            android:tint="#2196F3"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvTime2Label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="First dose"
+                            android:textColor="#1A1A1A"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTime2"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Select time"
+                            android:textSize="16sp"
+                            android:textColor="#2196F3"
+                            app:cornerRadius="8dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Time 3 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#2196F3"
+                    app:strokeWidth="1dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="20dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            android:tint="#2196F3"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:id="@+id/tvTime3Label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="First dose"
+                            android:textColor="#1A1A1A"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTime3"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Select time"
+                            android:textSize="16sp"
+                            android:textColor="#2196F3"
+                            app:cornerRadius="8dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Navigation Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="20dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPrevious"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="12dp"
+                android:text="Previous"
+                android:textSize="16sp"
+                android:textColor="#666666"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNext"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="Next"
+                android:textSize="16sp"
+                app:cornerRadius="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+    </FrameLayout>
+</ScrollView>

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
+
+    <!-- App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/white"
+            app:navigationIcon="@drawable/ic_close"
+            app:navigationIconTint="#000000" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="20dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tvTaskTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="Taking Morning medicine"
+                android:textColor="#1A1A1A"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="Taking Morning medicine" />
+
+            <!-- Step Indicators -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="28dp">
+
+                <!-- Step 1: Place Pills -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="28dp"
+                        app:cardBackgroundColor="#6200EE"
+                        app:cardElevation="4dp">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_pills"
+                            app:tint="@android:color/white" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Place Pills"
+                        android:textColor="#6200EE"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Step 2: Take Photo -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="28dp"
+                        app:cardBackgroundColor="#E8E8E8"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_camera"
+                            app:tint="#9E9E9E" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Take Photo"
+                        android:textColor="#9E9E9E"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <!-- Step 3: Verify Pills -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="28dp"
+                        app:cardBackgroundColor="#E8E8E8"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_check"
+                            app:tint="#9E9E9E" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Verify Pills"
+                        android:textColor="#9E9E9E"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Instructions -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Place the medication listed below in a well-lit environment where each capsule/tablet is spaced out."
+                android:textColor="#757575"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Medications Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="2dp"
+                app:cardBackgroundColor="@android:color/white"
+                android:layout_marginBottom="32dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <!-- Table Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="DRUG NAME"
+                            android:textColor="#6200EE"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.05" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="QUANTITY"
+                            android:textColor="#6200EE"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:gravity="end"
+                            android:letterSpacing="0.05" />
+
+                    </LinearLayout>
+
+                    <!-- Medications List (Dynamic) -->
+                    <LinearLayout
+                        android:id="@+id/llMedicationsList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <!-- Medication items will be added dynamically here -->
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Let's Start Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLetsStart"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="LET'S START!"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#6200EE"
+                app:cornerRadius="16dp"
+                android:layout_marginTop="24dp"
+                app:elevation="4dp" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

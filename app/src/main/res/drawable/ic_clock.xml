@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM12,20c-4.41,0 -8,-3.59 -8,-8s3.59,-8 8,-8 8,3.59 8,8 -3.59,8 -8,8zM11,3.83l0.53,0.53C12.72,5.08 14.07,5.5 15.38,6.38l0.59,0.59C16.67,7.5 17.5,8.83 17.5,10.33l0.17,1.31C18.13,12.5 17.92,13.74 17.28,14.77L16.5,16l-1.23,1.23C14.26,18 12.74,18 11.5,17.25V20h-2v-2.75c-1.24,0.74 -2.76,0.75 -4,0L4,16.5l0.77,-0.78C5.08,14.07 5.5,12.72 6.38,11.53L7,11l1.23,-1.23C9,8.83 9.83,7.5 10.33,6.5L11,6l0.53,-0.53L11,3.83z"/>
+    <!-- Standard Material clock face with hands -->
+</vector>

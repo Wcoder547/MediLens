@@ -1,35 +1,44 @@
 package com.example.medilens
 
-import android.graphics.LinearGradient
-import android.graphics.Shader
 import android.os.Bundle
-import android.widget.TextView
-import androidx.activity.ComponentActivity
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity  // CHANGED: From ComponentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.commitNow
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class HomeActivity : ComponentActivity() {
+class HomeActivity : AppCompatActivity() {  // CHANGED
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        val userName = intent.getStringExtra("USER_NAME") ?: "User"
-        val userEmail = intent.getStringExtra("USER_EMAIL") ?: ""
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    loadFragment(HomeFragment())
+                    true
+                }
+                R.id.nav_prescriptions -> {
+                    loadFragment(PrescriptionsFragment())
+                    true
+                }
+                R.id.nav_calendar -> {
+                    loadFragment(CalendarFragment())
+                    true
+                }
+                else -> false
+            }
+        }
 
-        val textView = findViewById<TextView>(R.id.tvGreeting)
-        val paint = textView.paint
-        val width = paint.measureText(textView.text.toString())
-        val textShader = LinearGradient(
-            0f, 0f, width, textView.textSize,
-            intArrayOf(
-                ContextCompat.getColor(this, R.color.primary),
-                ContextCompat.getColor(this, R.color.secondary)
-            ),
-            null,
-            Shader.TileMode.CLAMP
-        )
-        textView.paint.shader = textShader
+        if (savedInstanceState == null) {
+            bottomNav.selectedItemId = R.id.nav_home
+            loadFragment(HomeFragment())
+        }
+    }
 
-//        findViewById<TextView>(R.id.welcomeText).text =
-//            "Welcome, $userName\nEmail: $userEmail"
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.commitNow {  // Now works perfectly!
+            replace(R.id.fragment_container, fragment)
+        }
     }
 }

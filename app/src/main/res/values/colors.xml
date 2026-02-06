@@ -1,14 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Your exact existing colors -->
     <color name="heading">#0B0B0B</color>
     <color name="subtext">#9B9B9B</color>
     <color name="surface">#F6F5FA</color>
     <color name="white">#FFFFFF</color>
-    <!-- bottom nav tint: active vs inactive (use selector if you want different colors) -->
     <color name="bottom_icon_active">#5B3BFF</color>
     <color name="bottom_icon_inactive">#8D8D8D</color>
-    <color name="primary">#5B3BFF</color> <!-- blue/purple -->
+    <color name="primary">#5B3BFF</color>
     <color name="secondary">#4CAF50</color>
     <color name="primaryText">#212121</color>
+    <color name="purple_500">#6200EE</color>
+    <!-- Status colors for medicine calendar logs -->
+    <color name="green">#4CAF50</color>
+    <color name="red">#F44336</color>
+    <color name="orange">#FF9800</color>
+    <color name="purple_700">#6200EE</color>
+
+
+    <!-- Status backgrounds (perfect match for your design) -->
+    <color name="status_taken_bg">#E8F5E8</color>
+    <color name="status_missed_bg">#FFEBEE</color>
+    <color name="status_pending_bg">#FFF3E0</color>
+
+    <!-- Material3 colors for Prescription Cards (Exact UI match) -->
+    <color name="on_surface">#1C1B1F</color>
+    <color name="on_surface_variant">#49454F</color>
+    <color name="outline">#79747E</color>
+    <color name="primary_container">#E6DFFF</color>
+    <color name="secondary_container">#E1F5E2</color>
+    <color name="tertiary_container">#FCE4EC</color>
+
+    <!-- FIX: Added missing divider color -->
+    <!-- Standard Material Design divider: 12% black opacity for subtle separation -->
+    <!-- Matches your MediLens clean UI theme perfectly -->
+    <color name="divider">#1F000000</color>
 
 </resources>

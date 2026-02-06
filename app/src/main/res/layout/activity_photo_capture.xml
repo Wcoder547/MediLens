@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
+
+    <!-- App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/white"
+            app:navigationIcon="@drawable/ic_close"
+            app:navigationIconTint="#000000" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTaskTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Taking Morning medicine"
+            android:textColor="#1A1A1A"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Taking Morning medicine" />
+
+        <!-- Progress Indicator Container -->
+        <LinearLayout
+            android:id="@+id/llProgressIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTaskTitle">
+
+            <!-- Step 1: Place Pills (Completed) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardBackgroundColor="#6200EE"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_check"
+                        app:tint="@android:color/white" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- Connecting Line 1 -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="3dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:background="#6200EE" />
+
+            <!-- Step 2: Take Photo (Active) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardBackgroundColor="#6200EE"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="2"
+                        android:textColor="@android:color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Take Photo"
+                    android:textColor="#6200EE"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Connecting Line 2 -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="3dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:background="#E0E0E0" />
+
+            <!-- Step 3: Verify Pills (Inactive) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardBackgroundColor="#E8E8E8"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="3"
+                        android:textColor="#9E9E9E"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Verify Pills"
+                    android:textColor="#9E9E9E"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:id="@+id/llActionButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/llProgressIndicator">
+
+            <!-- Take a Photo Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTakePhoto"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Take a photo"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#6200EE"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_camera"
+                app:iconTint="@android:color/white"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+            <!-- Select Photo from Gallery Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectFromGallery"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="Select photo from gallery"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#6200EE"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
+                app:icon="@drawable/ic_gallery"
+                app:iconTint="@android:color/white"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+        </LinearLayout>
+
+        <!-- Bottom Navigation Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Go Back Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGoBack"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Go Back"
+                android:textSize="16sp"
+                android:textColor="#666666"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="2dp"
+                app:cornerRadius="16dp" />
+
+            <!-- Verify Button (Disabled initially) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVerify"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Verify!"
+                android:textSize="16sp"
+                android:enabled="false"
+                app:backgroundTint="#E0E0E0"
+                app:cornerRadius="16dp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

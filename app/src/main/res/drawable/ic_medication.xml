@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,3L2,21h5v-2L9,19v-4l0,-2L7,13v-2h2L9,9h2v2h2L15,11v2h-2v2h2v4l2,2v2h5L22,3L12,3z"/>
+    <!-- Simple pill/bottle shape; customize pathData for better design -->
+</vector>

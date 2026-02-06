@@ -1,6 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Existing -->
     <string name="app_name">MediLens</string>
     <string name="default_web_client_id">
         790152497141-6liejiv686s3654qpsn2vctv33ddnbue.apps.googleusercontent.com
-</string>
+    </string>
+
+    <!-- Prescription Form (MERGED) -->
+    <string name="add_new_prescription">Add New Prescription</string>
+    <string name="frequency">Frequency</string>
+    <string name="drug_identification_number_din">Drug Identification Number (DIN)</string>
+    <string name="medicine_name">Medicine Name</string>
+    <string name="times_hint">Times (e.g. 8:00 AM, 6:00 PM)</string>
+    <string name="dosage_hint">Dosage (e.g. 100mg)</string>
+    <string name="notes_optional">Notes (optional)</string>
+    <string name="save_prescription">Save Prescription</string>
+    <string name="cancel">Cancel</string>
+    <string name="health_canada_pills">Supports 13,000+ Health Canada approved pills</string>
+    <string name="to_add_a_prescription_press_the_button_below">To add a prescription , press the \'+\' button below</string>
+    <string name="no_prescriptions_added">No prescriptions added</string>
+    <string name="todo">TODO</string>
+    <string name="time_frequency"><![CDATA[Time & frequency]]></string>
 </resources>

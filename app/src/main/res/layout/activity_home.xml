@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Main screen layout that matches the screenshot -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,66 +8,11 @@
     android:layout_height="match_parent"
     android:background="@color/surface">
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/content_container"
+    <!-- FIXED: Removed android:name - FragmentContainerView is NOT a Fragment! -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingStart="20dp"
-        android:paddingTop="24dp"
-        android:paddingEnd="20dp"
-        app:layout_anchor="@+id/content_container"
-        app:layout_anchorGravity="center">
-
-
-        <TextView
-            android:id="@+id/tvGreeting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="80dp"
-            android:fontFamily="@font/poppins_semibold"
-            android:paddingHorizontal="24dp"
-            android:shadowColor="#1A000000"
-            android:shadowDx="0"
-            android:shadowDy="2"
-            android:shadowRadius="4"
-            android:text="Good Morning, Joe 👋"
-            android:textColor="@color/primaryText"
-            android:textSize="26sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <ImageView
-            android:id="@+id/imgIllustration"
-            android:layout_width="220dp"
-            android:layout_height="220dp"
-            android:layout_marginTop="72dp"
-            android:contentDescription="Illustration"
-            android:scaleType="fitCenter"
-            android:src="@drawable/reading"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.41"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGreeting" />
-
-        <TextView
-            android:id="@+id/tvSubText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:shadowColor="@color/white"
-            android:text="You're all clear for today!"
-            android:textColor="@color/subtext"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgIllustration" />
-
-        <!-- Spacer above bottom nav (so content doesn't hide behind nav) -->
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
@@ -82,12 +26,5 @@
         app:menu="@menu/bottom_nav_menu"
         app:itemActiveIndicatorStyle="@style/Widget.App.BottomNavIndicator"
         app:itemIconSize="24dp"/>
-
-    <View
-        android:id="@+id/spacer"
-        android:layout_width="0dp"
-        android:layout_height="72dp"
-        app:layout_anchor="@+id/content_container"
-        app:layout_anchorGravity="bottom|center" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

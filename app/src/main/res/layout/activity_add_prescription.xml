@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Step header + close -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add a prescription"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/stepProgress"
+        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_marginTop="16dp"
+        app:indicatorColor="@color/primary"
+        app:trackColor="@color/divider"
+        app:indicatorDirectionLinear="leftToRight"
+        app:showAnimationBehavior="inward"
+        android:progress="25" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Step 1 of 4 · Prescription"
+        android:textSize="12sp"
+        android:textColor="@color/subtext"
+        android:layout_marginTop="8dp" />
+
+    <!-- Card-like container -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="18dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Prescription name"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Give this prescription an easy name, like 'Morning meds'."
+                android:textSize="12sp"
+                android:textColor="@color/subtext"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPrescriptionName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="e.g. Morning medicine"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Bottom navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextStep1"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Next"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:backgroundTint="@color/primary" />
+    </LinearLayout>
+
+</LinearLayout>

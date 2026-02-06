@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:background="@drawable/bg_header_gradient">
+
+            <!-- Date Display -->
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#5E35B1"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                tools:text="WED 2 APR" />
+
+            <!-- Dynamic Greeting -->
+            <TextView
+                android:id="@+id/tvGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#1A1A1A"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                tools:text="Good morning, Joe" />
+
+            <!-- Section Header -->
+            <TextView
+                android:id="@+id/tvSectionHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Today's schedule"
+                android:textColor="#1A1A1A"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Schedule List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDailySchedule"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                tools:listitem="@layout/item_schedule" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyStateSchedule"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:src="@drawable/reading"
+                    android:contentDescription="No schedule"
+                    android:alpha="0.7" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="You're all clear for today!"
+                    android:textColor="#666666"
+                    android:textSize="16sp"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="No medications scheduled"
+                    android:textColor="#999999"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

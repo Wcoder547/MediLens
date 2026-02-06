@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface">
+
+    <CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:dateTextAppearance="@android:style/TextAppearance.Material.Medium"
+        android:weekDayTextAppearance="@android:style/TextAppearance.Material.Caption" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/tvSelectedDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Jan 29, 2026"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_semibold"
+            android:textColor="@color/primaryText" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 meds today"
+            android:textSize="14sp"
+            android:textColor="@color/subtext" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Today's Medicines"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:fontFamily="@font/poppins_semibold"
+        android:textColor="@color/primaryText" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMedicineLogs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp" />
+
+    <!-- Fixed FAB - removed problematic app:fabSize -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddMedicine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_gravity="bottom|end"
+        android:src="@android:drawable/ic_input_add"
+        app:tint="@color/white"
+        app:backgroundTint="@color/primary" />
+
+</LinearLayout>

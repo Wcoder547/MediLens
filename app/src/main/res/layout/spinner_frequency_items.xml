@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinner_frequency_items">
+        <item>Select frequency</item>
+        <item>Once daily</item>
+        <item>Twice daily</item>
+        <item>Three times daily</item>
+        <item>Four times daily</item>
+        <item>As needed</item>
+        <item>Weekly</item>
+    </string-array>
+</resources>

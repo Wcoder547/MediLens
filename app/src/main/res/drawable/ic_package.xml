@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M20,8h-3L17,4L15,4L15,8h-3L12,4L10,4L10,8L7,8c-0.55,0 -1,0.45 -1,1v11c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2v-11C21,8.45 20.55,8 20,8zM17,18L7,18v-7h10V18z"/>
+    <!-- Package/box for "30 tablets total" -->
+</vector>

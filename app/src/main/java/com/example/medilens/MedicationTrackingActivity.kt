@@ -25,6 +25,8 @@ class MedicationTrackingActivity : AppCompatActivity() {
         const val EXTRA_SCHEDULE_TITLE = "schedule_title"
         const val EXTRA_SCHEDULE_TIME = "schedule_time"
         const val EXTRA_PRESCRIPTION_IDS = "prescription_ids"
+
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +59,13 @@ class MedicationTrackingActivity : AppCompatActivity() {
         // Setup button - Navigate to Photo Capture
         btnLetsStart.setOnClickListener {
             val intent = Intent(this, PhotoCaptureActivity::class.java).apply {
-                putExtra(PhotoCaptureActivity.EXTRA_SCHEDULE_TITLE, scheduleTitle)
+                putExtra(PhotoCaptureActivity.EXTRA_SCHEDULE_TITLE, tvTaskTitle.text.toString())
+                putExtra(PhotoCaptureActivity.EXTRA_SCHEDULE_TIME, intent.getStringExtra(EXTRA_SCHEDULE_TIME))
+                putExtra(PhotoCaptureActivity.EXTRA_PRESCRIPTION_IDS, intent.getLongArrayExtra(EXTRA_PRESCRIPTION_IDS))
             }
             startActivity(intent)
         }
+
     }
 
     private fun extractLabel(fullTitle: String): String {

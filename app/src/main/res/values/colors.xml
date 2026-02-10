@@ -36,4 +36,8 @@
     <!-- Matches your MediLens clean UI theme perfectly -->
     <color name="divider">#1F000000</color>
 
+    <color name="success_green">#4CAF50</color>
+    <color name="error_red">#F44336</color>
+
+
 </resources>

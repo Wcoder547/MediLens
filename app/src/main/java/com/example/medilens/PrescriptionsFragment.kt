@@ -36,6 +36,10 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
     private lateinit var emptyState: LinearLayout
     private lateinit var prescriptionsList: LinearLayout
 
+    companion object {
+        private const val TAG = "PrescriptionsFragment"
+    }
+
     // ---------- EXTENSION ----------
     private fun TextInputEditText?.validateNotEmpty(errorMsg: String): Boolean {
         return this?.let {
@@ -113,7 +117,6 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
         // Buttons
         val btnPrevious = dialogView.findViewById<MaterialButton>(R.id.btnPrevious)
         val btnNext = dialogView.findViewById<MaterialButton>(R.id.btnNext)
-
 
         // Step 1
         val etPrescriptionName = dialogView.findViewById<TextInputEditText>(R.id.etPrescriptionName)
@@ -239,7 +242,6 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
 
         val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
 
-
         btnPrevious.setOnClickListener {
             if (currentStep == 1) dialog.dismiss() else {
                 currentStep--
@@ -254,25 +256,53 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
                 3 -> if (validateStep3()) {
                     val entity = buildPrescriptionEntity()
                     lifecycleScope.launch {
-                        if (position != null) {
-                            val original = prescriptionDao.getAllPrescriptions().first()[position]
-                            prescriptionDao.update(original.copy(
-                                prescriptionName = entity.prescriptionName,
-                                drugName = entity.drugName,
-                                dosageQuantity = entity.dosageQuantity,
-                                totalDrugQuantity = entity.totalDrugQuantity,
-                                frequency = entity.frequency,
-                                time1 = entity.time1,
-                                time2 = entity.time2,
-                                time3 = entity.time3
-                            ))
-                            Toast.makeText(requireContext(), "✅ Updated!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            prescriptionDao.insert(entity)
-                            Toast.makeText(requireContext(), "✅ Added!", Toast.LENGTH_SHORT).show()
+                        try {
+                            if (position != null) {
+                                // UPDATE EXISTING PRESCRIPTION
+                                val original = prescriptionDao.getAllPrescriptions().first()[position]
+                                val updatedPrescription = original.copy(
+                                    prescriptionName = entity.prescriptionName,
+                                    drugName = entity.drugName,
+                                    dosageQuantity = entity.dosageQuantity,
+                                    totalDrugQuantity = entity.totalDrugQuantity,
+                                    frequency = entity.frequency,
+                                    time1 = entity.time1,
+                                    time2 = entity.time2,
+                                    time3 = entity.time3
+                                )
+
+                                // Cancel old alarms
+                                MedicationAlarmManager.cancelAlarms(requireContext(), original)
+
+                                // Update in database
+                                prescriptionDao.update(updatedPrescription)
+
+                                // Schedule new alarms
+                                MedicationAlarmManager.scheduleAlarms(requireContext(), updatedPrescription)
+
+                                Log.d(TAG, "✅ Prescription updated and alarms rescheduled: ${updatedPrescription.drugName}")
+                                Toast.makeText(requireContext(), "✅ Updated with reminders!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                // INSERT NEW PRESCRIPTION
+                                val prescriptionId = prescriptionDao.insert(entity)
+
+                                // Get the inserted prescription with ID
+                                val insertedPrescription = entity.copy(id = prescriptionId)
+
+                                // Schedule alarms for this prescription
+                                MedicationAlarmManager.scheduleAlarms(requireContext(), insertedPrescription)
+
+                                Log.d(TAG, "✅ Prescription saved and alarms scheduled: ${insertedPrescription.drugName}")
+                                Toast.makeText(requireContext(), "✅ Added with reminders!", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "❌ Error saving prescription", e)
+                            Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
                     dialog.dismiss()
+                } else {
+                    Toast.makeText(requireContext(), "Please select all required times", Toast.LENGTH_SHORT).show()
                 }
             }
         }

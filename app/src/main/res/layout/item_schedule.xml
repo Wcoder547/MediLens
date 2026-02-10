@@ -51,15 +51,36 @@
 
         </LinearLayout>
 
-        <!-- Right side: Chevron icon -->
-        <ImageView
-            android:id="@+id/ivChevron"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="12dp"
-            android:src="@drawable/ic_chevron_right"
-            android:tint="#999999"
-            android:contentDescription="View details" />
+        <!-- Right side: Checkmark and Chevron -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="12dp">
+
+            <!-- Checkmark Icon (for completed tasks) -->
+            <ImageView
+                android:id="@+id/ivCheckmark"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:tint="#4CAF50"
+                android:contentDescription="Completed"
+                tools:visibility="visible" />
+
+            <!-- Chevron icon -->
+            <ImageView
+                android:id="@+id/ivChevron"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chevron_right"
+                android:tint="#999999"
+                android:contentDescription="View details" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

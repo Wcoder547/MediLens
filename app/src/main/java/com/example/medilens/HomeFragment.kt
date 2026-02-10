@@ -46,6 +46,15 @@ class HomeFragment : Fragment() {
         setupUI()
         setupRecyclerView()
         loadDailySchedule()
+
+        // Reschedule all alarms on app start
+        rescheduleAllAlarms()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh schedule when returning to home
+        loadDailySchedule()
     }
 
     private fun setupUI() {
@@ -87,8 +96,15 @@ class HomeFragment : Fragment() {
 
     private fun loadDailySchedule() {
         lifecycleScope.launch {
+            val currentDate = getCurrentDate()
+
             db.prescriptionDao().getAllPrescriptions().collect { prescriptions ->
                 val scheduleItems = generateDailySchedule(prescriptions)
+
+                // Check completion status for each item
+                for (item in scheduleItems) {
+                    item.isCompleted = isTaskCompleted(item, currentDate)
+                }
 
                 if (scheduleItems.isEmpty()) {
                     emptyStateSchedule.visibility = View.VISIBLE
@@ -97,6 +113,32 @@ class HomeFragment : Fragment() {
                     emptyStateSchedule.visibility = View.GONE
                     rvDailySchedule.visibility = View.VISIBLE
                     scheduleAdapter.updateList(scheduleItems)
+                }
+            }
+        }
+    }
+
+    private fun getCurrentDate(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return dateFormat.format(Date())
+    }
+
+    private suspend fun isTaskCompleted(scheduleItem: ScheduleItem, currentDate: String): Boolean {
+        // Check if all prescriptions for this time slot are completed
+        return scheduleItem.prescriptionIds.all { prescriptionId ->
+            db.medicationLogDao().isTaskCompleted(
+                prescriptionId,
+                scheduleItem.time,
+                currentDate
+            ) != null
+        }
+    }
+
+    private fun rescheduleAllAlarms() {
+        lifecycleScope.launch {
+            db.prescriptionDao().getAllPrescriptions().collect { prescriptions ->
+                prescriptions.forEach { prescription ->
+                    MedicationAlarmManager.scheduleAlarms(requireContext(), prescription)
                 }
             }
         }

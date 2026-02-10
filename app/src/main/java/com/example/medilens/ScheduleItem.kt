@@ -1,11 +1,13 @@
 package com.example.medilens
 
 data class ScheduleItem(
-    val timeLabel: String,  // e.g., "Morning medicine - 12:00 PM"
-    val time: String,        // e.g., "12:00 PM" for sorting
+    val timeLabel: String,
+    val time: String,
     val medications: List<MedicationDetail>,
-    val prescriptionIds: List<Long> = emptyList()  // Changed to Long
+    val prescriptionIds: List<Long>,
+    var isCompleted: Boolean = false // Add this
 )
+
 
 data class MedicationDetail(
     val name: String,        // e.g., "Take 1 pill of Stalevo(125MG)"

@@ -8,12 +8,26 @@
     android:layout_height="match_parent"
     android:background="@color/surface">
 
-    <!-- FIXED: Removed android:name - FragmentContainerView is NOT a Fragment! -->
+    <!-- Fragment Container -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Logout Button (Three Dots Menu) - Fixed in top-right corner -->
+    <ImageButton
+        android:id="@+id/btnLogout"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="12dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_more_vert"
+        android:contentDescription="Menu"
+        android:padding="12dp"
+        app:tint="#000000" />
+
+    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"

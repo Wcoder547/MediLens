@@ -8,15 +8,16 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 
 class DailyScheduleAdapter(
     private val onItemClick: (ScheduleItem) -> Unit
 ) : RecyclerView.Adapter<DailyScheduleAdapter.ScheduleViewHolder>() {
 
-    private var scheduleItems = listOf<ScheduleItem>()
+    private var scheduleList: List<ScheduleItem> = emptyList()
 
     fun updateList(newList: List<ScheduleItem>) {
-        scheduleItems = newList
+        scheduleList = newList
         notifyDataSetChanged()
     }
 
@@ -27,14 +28,17 @@ class DailyScheduleAdapter(
     }
 
     override fun onBindViewHolder(holder: ScheduleViewHolder, position: Int) {
-        holder.bind(scheduleItems[position])
+        val item = scheduleList[position]
+        holder.bind(item)
     }
 
-    override fun getItemCount() = scheduleItems.size
+    override fun getItemCount(): Int = scheduleList.size
 
     inner class ScheduleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val cardView: MaterialCardView = itemView.findViewById(R.id.cardScheduleItem)
         private val tvScheduleTitle: TextView = itemView.findViewById(R.id.tvScheduleTitle)
         private val llMedications: LinearLayout = itemView.findViewById(R.id.llMedications)
+        private val ivCheckmark: ImageView = itemView.findViewById(R.id.ivCheckmark)
         private val ivChevron: ImageView = itemView.findViewById(R.id.ivChevron)
 
         fun bind(item: ScheduleItem) {
@@ -43,25 +47,54 @@ class DailyScheduleAdapter(
             // Clear previous medications
             llMedications.removeAllViews()
 
-            // Add each medication as a text line with proper styling
-            item.medications.forEachIndexed { index, medication ->
-                val medicationView = TextView(itemView.context).apply {
-                    text = medication.name
-                    setTextColor(Color.parseColor("#333333")) // Dark gray/black color
-                    textSize = 14f
-
-                    // Add spacing between medication items
-                    val topPadding = if (index == 0) 0 else 8
-                    setPadding(0, topPadding, 0, 0)
-
-                    // Line spacing for better readability
-                    setLineSpacing(4f, 1.2f)
-                }
+            // Add medication items
+            item.medications.forEach { medication ->
+                val medicationView = createMedicationView(medication.name, item.isCompleted)
                 llMedications.addView(medicationView)
             }
 
-            itemView.setOnClickListener {
-                onItemClick(item)
+            // Apply completed styling
+            if (item.isCompleted) {
+                // Show checkmark
+                ivCheckmark.visibility = View.VISIBLE
+
+                // Apply grayed-out style
+                cardView.alpha = 0.5f
+                tvScheduleTitle.setTextColor(Color.parseColor("#999999"))
+                ivChevron.alpha = 0.5f
+
+                // Disable click
+                cardView.isClickable = false
+                cardView.isFocusable = false
+                cardView.foreground = null
+            } else {
+                // Hide checkmark
+                ivCheckmark.visibility = View.GONE
+
+                // Normal style
+                cardView.alpha = 1.0f
+                tvScheduleTitle.setTextColor(Color.parseColor("#2196F3"))
+                ivChevron.alpha = 1.0f
+
+                // Enable click
+                cardView.isClickable = true
+                cardView.isFocusable = true
+                cardView.setOnClickListener {
+                    onItemClick(item)
+                }
+            }
+        }
+
+        private fun createMedicationView(medicationText: String, isCompleted: Boolean): TextView {
+            return TextView(itemView.context).apply {
+                text = medicationText
+                setTextColor(if (isCompleted) {
+                    Color.parseColor("#BBBBBB")
+                } else {
+                    Color.parseColor("#666666")
+                })
+                textSize = 14f
+                setPadding(0, 4, 0, 4)
             }
         }
     }

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 import android.widget.TextView
 import java.io.File
 import java.text.SimpleDateFormat
@@ -21,6 +24,8 @@ class PhotoCaptureActivity : AppCompatActivity() {
 
     private lateinit var toolbar: MaterialToolbar
     private lateinit var tvTaskTitle: TextView
+    private lateinit var cvPhotoPreview: MaterialCardView
+    private lateinit var ivPhotoPreview: ImageView
     private lateinit var btnTakePhoto: MaterialButton
     private lateinit var btnSelectFromGallery: MaterialButton
     private lateinit var btnGoBack: MaterialButton
@@ -31,8 +36,11 @@ class PhotoCaptureActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_SCHEDULE_TITLE = "schedule_title"
+        const val EXTRA_SCHEDULE_TIME = "schedule_time"
+        const val EXTRA_PRESCRIPTION_IDS = "prescription_ids"
         const val EXTRA_CAPTURED_IMAGE_URI = "captured_image_uri"
     }
+
 
     // Camera launcher
     private val takePictureLauncher = registerForActivityResult(
@@ -70,6 +78,8 @@ class PhotoCaptureActivity : AppCompatActivity() {
         // Initialize views
         toolbar = findViewById(R.id.toolbar)
         tvTaskTitle = findViewById(R.id.tvTaskTitle)
+        cvPhotoPreview = findViewById(R.id.cvPhotoPreview)
+        ivPhotoPreview = findViewById(R.id.ivPhotoPreview)
         btnTakePhoto = findViewById(R.id.btnTakePhoto)
         btnSelectFromGallery = findViewById(R.id.btnSelectFromGallery)
         btnGoBack = findViewById(R.id.btnGoBack)
@@ -98,9 +108,20 @@ class PhotoCaptureActivity : AppCompatActivity() {
         }
 
         btnVerify.setOnClickListener {
-            // TODO: Navigate to verification screen with the captured image
-            Toast.makeText(this, "Verifying medication...", Toast.LENGTH_SHORT).show()
+            capturedImageUri?.let { uri ->
+                val intent = Intent(this, VerificationLoadingActivity::class.java).apply {
+                    putExtra(VerificationLoadingActivity.EXTRA_SCHEDULE_TITLE, tvTaskTitle.text.toString())
+                    putExtra(VerificationLoadingActivity.EXTRA_SCHEDULE_TIME, intent.getStringExtra(EXTRA_SCHEDULE_TIME))
+                    putExtra(VerificationLoadingActivity.EXTRA_PRESCRIPTION_IDS, intent.getLongArrayExtra(EXTRA_PRESCRIPTION_IDS))
+                    putExtra(VerificationLoadingActivity.EXTRA_IMAGE_URI, uri.toString())
+                }
+                startActivity(intent)
+            } ?: run {
+                Toast.makeText(this, "Please capture or select a photo first", Toast.LENGTH_SHORT).show()
+            }
         }
+
+
     }
 
     private fun extractLabel(fullTitle: String): String {
@@ -130,7 +151,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
                 it
             )
             capturedImageUri = uri
-            takePictureLauncher.launch(uri) // Fixed: Use the non-null 'uri' directly
+            takePictureLauncher.launch(uri)
         }
     }
 
@@ -154,7 +175,11 @@ class PhotoCaptureActivity : AppCompatActivity() {
     private fun onPhotoSelected(uri: Uri) {
         capturedImageUri = uri
 
-        // Enable verify button
+        // Show photo preview
+        cvPhotoPreview.visibility = View.VISIBLE
+        ivPhotoPreview.setImageURI(uri)
+
+        // Enable verify button with purple color
         btnVerify.isEnabled = true
         btnVerify.backgroundTintList = ContextCompat.getColorStateList(this, R.color.purple_700)
 

@@ -2,6 +2,7 @@ package com.example.medilens
 
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -11,11 +12,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,168 +39,164 @@ class VerificationResultsActivity : AppCompatActivity() {
     private lateinit var btnFinish: MaterialButton
     private lateinit var db: AppDatabase
 
-    private var isValid = false
     private var scheduleTime = ""
     private var prescriptionIds: List<Long> = emptyList()
 
     companion object {
-        const val EXTRA_SCHEDULE_TITLE = "schedule_title"
-        const val EXTRA_SCHEDULE_TIME = "schedule_time"
+        const val EXTRA_SCHEDULE_TITLE   = "schedule_title"
+        const val EXTRA_SCHEDULE_TIME    = "schedule_time"
         const val EXTRA_PRESCRIPTION_IDS = "prescription_ids"
-        const val EXTRA_IMAGE_URI = "image_uri"
-        const val EXTRA_IS_VALID = "is_valid"
+        const val EXTRA_IMAGE_URI        = "image_uri"
+        const val EXTRA_IS_VALID         = "is_valid"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_verification_results)
 
-        // Initialize database
         db = AppDatabase.getDatabase(this)
 
-        // Initialize views
-        toolbar = findViewById(R.id.toolbar)
-        tvTitle = findViewById(R.id.tvTitle)
-        llStatusMessage = findViewById(R.id.llStatusMessage)
-        ivStatusIcon = findViewById(R.id.ivStatusIcon)
-        tvStatusTitle = findViewById(R.id.tvStatusTitle)
-        tvStatusDescription = findViewById(R.id.tvStatusDescription)
-        llAddMissingSection = findViewById(R.id.llAddMissingSection)
-        llMissingPillsList = findViewById(R.id.llMissingPillsList)
+        toolbar                  = findViewById(R.id.toolbar)
+        tvTitle                  = findViewById(R.id.tvTitle)
+        llStatusMessage          = findViewById(R.id.llStatusMessage)
+        ivStatusIcon             = findViewById(R.id.ivStatusIcon)
+        tvStatusTitle            = findViewById(R.id.tvStatusTitle)
+        tvStatusDescription      = findViewById(R.id.tvStatusDescription)
+        llAddMissingSection      = findViewById(R.id.llAddMissingSection)
+        llMissingPillsList       = findViewById(R.id.llMissingPillsList)
         llRemoveIncorrectSection = findViewById(R.id.llRemoveIncorrectSection)
-        rvIncorrectPills = findViewById(R.id.rvIncorrectPills)
-        cvResultImage = findViewById(R.id.cvResultImage)
-        ivResultImage = findViewById(R.id.ivResultImage)
-        btnPrevious = findViewById(R.id.btnPrevious)
-        btnFinish = findViewById(R.id.btnFinish)
+        rvIncorrectPills         = findViewById(R.id.rvIncorrectPills)
+        cvResultImage            = findViewById(R.id.cvResultImage)
+        ivResultImage            = findViewById(R.id.ivResultImage)
+        btnPrevious              = findViewById(R.id.btnPrevious)
+        btnFinish                = findViewById(R.id.btnFinish)
 
-        // Setup toolbar
-        toolbar.setNavigationOnClickListener {
-            finish()
+        toolbar.setNavigationOnClickListener { finish() }
+
+        val scheduleTitle   = intent.getStringExtra(EXTRA_SCHEDULE_TITLE) ?: "Taking medication"
+        scheduleTime        = intent.getStringExtra(EXTRA_SCHEDULE_TIME) ?: ""
+        prescriptionIds     = intent.getLongArrayExtra(EXTRA_PRESCRIPTION_IDS)?.toList() ?: emptyList()
+        val imageUri        = intent.getStringExtra(EXTRA_IMAGE_URI)
+
+        val pillName    = intent.getStringExtra(VerificationLoadingActivity.EXTRA_PILL_NAME) ?: ""
+        val confidence  = intent.getFloatExtra(VerificationLoadingActivity.EXTRA_CONFIDENCE, 0f)
+        val pillCount   = intent.getIntExtra(VerificationLoadingActivity.EXTRA_PILL_COUNT, 0)
+        val allDetected = intent.getStringArrayExtra(VerificationLoadingActivity.EXTRA_ALL_DETECTED)?.toList() ?: emptyList()
+        val noDetection = intent.getBooleanExtra(VerificationLoadingActivity.EXTRA_NO_DETECTION, false)
+
+        // FIX: clean "Taking Taking X" → "Taking X" here too
+        tvTitle.text = cleanTitle(scheduleTitle)
+
+        imageUri?.let { ivResultImage.setImageURI(Uri.parse(it)) }
+
+        lifecycleScope.launch {
+            val allPrescriptions = db.prescriptionDao().getAllPrescriptions().first()
+            val scheduledMeds    = allPrescriptions.filter { it.id in prescriptionIds }
+            val prescribedDrugs  = scheduledMeds.map { it.drugName }
+
+            if (noDetection) showNoDetection()
+            else buildResult(pillName, confidence, pillCount, allDetected, prescribedDrugs)
         }
 
-        // Get data from intent
-        val scheduleTitle = intent.getStringExtra(EXTRA_SCHEDULE_TITLE) ?: "Taking medication"
-        scheduleTime = intent.getStringExtra(EXTRA_SCHEDULE_TIME) ?: ""
-        prescriptionIds = intent.getLongArrayExtra(EXTRA_PRESCRIPTION_IDS)?.toList() ?: emptyList()
-        val imageUri = intent.getStringExtra(EXTRA_IMAGE_URI)
-        isValid = intent.getBooleanExtra(EXTRA_IS_VALID, false)
-
-        tvTitle.text = extractLabel(scheduleTitle)
-
-        // Load result image
-        imageUri?.let {
-            ivResultImage.setImageURI(android.net.Uri.parse(it))
-        }
-
-        // Show dummy verification results
-        if (isValid) {
-            showValidResult()
-        } else {
-            showInvalidResult()
-        }
-
-        // Setup buttons
-        btnPrevious.setOnClickListener {
-            finish()
-        }
+        btnPrevious.setOnClickListener { finish() }
 
         btnFinish.setOnClickListener {
-            if (isValid) {
-                // Mark task as completed
+            if (btnFinish.isEnabled) {
                 markTaskAsCompleted()
-
                 Toast.makeText(this, "Medication verified successfully!", Toast.LENGTH_SHORT).show()
-
-                // Navigate back to home and clear the stack
-                val intent = Intent(this, HomeActivity::class.java).apply {
+                startActivity(Intent(this, HomeActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                }
-                startActivity(intent)
+                })
                 finish()
-            } else {
-                Toast.makeText(this, "Please correct the errors first", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun extractLabel(fullTitle: String): String {
-        return fullTitle.split(" - ").firstOrNull() ?: fullTitle
+    private fun cleanTitle(title: String): String {
+        val base = title.split(" - ").firstOrNull() ?: title
+        return if (base.startsWith("Taking Taking ", ignoreCase = true))
+            base.replaceFirst("Taking Taking ", "Taking ", ignoreCase = true)
+        else base
     }
 
-    private fun markTaskAsCompleted() {
-        lifecycleScope.launch {
-            val currentDate = getCurrentDate()
-
-            prescriptionIds.forEach { prescriptionId ->
-                val log = MedicationLogEntity(
-                    prescriptionId = prescriptionId,
-                    scheduledTime = scheduleTime,
-                    completedAt = System.currentTimeMillis(),
-                    completedDate = currentDate
-                )
-                db.medicationLogDao().insertLog(log)
-            }
-        }
-    }
-
-    private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(Date())
-    }
-
-    private fun showValidResult() {
-        // Show success message
-        llStatusMessage.visibility = View.VISIBLE
-        ivStatusIcon.setImageResource(R.drawable.ic_success)
-        ivStatusIcon.setColorFilter(Color.parseColor("#4CAF50"))
-        tvStatusTitle.text = "Medication valid!"
-        tvStatusTitle.setTextColor(Color.parseColor("#4CAF50"))
-        tvStatusDescription.text = "All medications are correctly placed. You can proceed to take them."
-
-        // Hide error sections
-        llAddMissingSection.visibility = View.GONE
+    private fun showNoDetection() {
+        llStatusMessage.visibility          = View.VISIBLE
+        llAddMissingSection.visibility      = View.GONE
         llRemoveIncorrectSection.visibility = View.GONE
 
-        // Enable finish button
-        btnFinish.isEnabled = true
-        btnFinish.backgroundTintList = ContextCompat.getColorStateList(this, R.color.purple_700)
-    }
-
-    private fun showInvalidResult() {
-        // Show error message
-        llStatusMessage.visibility = View.VISIBLE
         ivStatusIcon.setImageResource(R.drawable.ic_error)
         ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
-        tvStatusTitle.text = "Medication invalid."
+        tvStatusTitle.text = "No pills detected."
         tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
-        tvStatusDescription.text = "Please correct the following to take your prescription. Valid pills are outlined in green while invalid pills are outlined in red."
+        tvStatusDescription.text =
+            "We couldn't find any pills in the photo. " +
+                    "Make sure the pills are visible in good lighting and retake the photo."
 
-        // Show dummy missing pills
-        llAddMissingSection.visibility = View.VISIBLE
-        addDummyMissingPills()
-
-        // Show dummy incorrect pills
-        llRemoveIncorrectSection.visibility = View.VISIBLE
-        setupIncorrectPillsGrid()
-
-        // Disable finish button (user needs to correct)
         btnFinish.isEnabled = false
-        btnFinish.backgroundTintList = ContextCompat.getColorStateList(this, android.R.color.darker_gray)
+        btnFinish.backgroundTintList =
+            ContextCompat.getColorStateList(this, android.R.color.darker_gray)
     }
 
-    private fun addDummyMissingPills() {
-        // Dummy data - replace with actual missing pills from YOLO detection
-        val missingPills = listOf(
-            Pair("Stalevo, 125MG", "1"),
-            Pair("Teva-Cloxacillin, 250mg", "1")
-        )
+    private fun buildResult(
+        pillName: String,
+        confidence: Float,
+        pillCount: Int,
+        allDetected: List<String>,
+        prescribedDrugs: List<String>
+    ) {
+        llStatusMessage.visibility = View.VISIBLE
 
-        llMissingPillsList.removeAllViews()
+        val matchedDrugs = prescribedDrugs.filter { prescribed ->
+            allDetected.any { detected ->
+                detected.contains(prescribed, ignoreCase = true) ||
+                        prescribed.contains(detected, ignoreCase = true)
+            }
+        }
+        val missingDrugs = prescribedDrugs.filter { it !in matchedDrugs }
+        val isValid      = missingDrugs.isEmpty()
 
-        missingPills.forEach { (name, quantity) ->
-            val itemView = createMissingPillItem(name, quantity)
-            llMissingPillsList.addView(itemView)
+        if (isValid) {
+            ivStatusIcon.setImageResource(R.drawable.ic_success)
+            ivStatusIcon.setColorFilter(Color.parseColor("#4CAF50"))
+            tvStatusTitle.text = "Medication valid!"
+            tvStatusTitle.setTextColor(Color.parseColor("#4CAF50"))
+            tvStatusDescription.text =
+                "Detected: ${pillName.replaceFirstChar { it.uppercase() }}\n" +
+                        "Confidence: ${confidence.toInt()}%  •  $pillCount pill${if (pillCount != 1) "s" else ""} found\n\n" +
+                        "All medications are correctly placed. You can proceed to take them."
+
+            llAddMissingSection.visibility      = View.GONE
+            llRemoveIncorrectSection.visibility = View.GONE
+
+            btnFinish.isEnabled = true
+            btnFinish.backgroundTintList =
+                ContextCompat.getColorStateList(this, R.color.purple_700)
+
+        } else {
+            ivStatusIcon.setImageResource(R.drawable.ic_error)
+            ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
+            tvStatusTitle.text = "Medication invalid."
+            tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
+            tvStatusDescription.text =
+                "Detected: ${if (allDetected.isEmpty()) "unknown" else allDetected.joinToString(", ")}\n" +
+                        "Expected: ${prescribedDrugs.joinToString(", ")}\n\n" +
+                        "Please correct the following. Valid pills are outlined in green, invalid in red."
+
+            if (missingDrugs.isNotEmpty()) {
+                llAddMissingSection.visibility = View.VISIBLE
+                llMissingPillsList.removeAllViews()
+                missingDrugs.forEach { drug ->
+                    llMissingPillsList.addView(createMissingPillItem(drug, "1"))
+                }
+            } else {
+                llAddMissingSection.visibility = View.GONE
+            }
+
+            llRemoveIncorrectSection.visibility = View.GONE
+
+            btnFinish.isEnabled = false
+            btnFinish.backgroundTintList =
+                ContextCompat.getColorStateList(this, android.R.color.darker_gray)
         }
     }
 
@@ -208,36 +205,22 @@ class VerificationResultsActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = 16
-            }
+            ).apply { bottomMargin = 16 }
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
-
-        // Icon
         val icon = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(24, 24).apply {
-                marginEnd = 12
-            }
+            layoutParams = LinearLayout.LayoutParams(24, 24).apply { marginEnd = 12 }
             setImageResource(R.drawable.ic_pill)
             setColorFilter(Color.parseColor("#6200EE"))
         }
-
-        // Drug name
         val nameText = TextView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             text = name
             setTextColor(Color.parseColor("#1A1A1A"))
             textSize = 15f
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
-
-        // Quantity
         val quantityText = TextView(this).apply {
             layoutParams = LinearLayout.LayoutParams(80, LinearLayout.LayoutParams.WRAP_CONTENT)
             text = quantity
@@ -246,25 +229,25 @@ class VerificationResultsActivity : AppCompatActivity() {
             gravity = android.view.Gravity.END
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
-
         itemView.addView(icon)
         itemView.addView(nameText)
         itemView.addView(quantityText)
-
         return itemView
     }
 
-    private fun setupIncorrectPillsGrid() {
-        // Dummy incorrect pills images - replace with actual detected incorrect pills
-        val incorrectPillsImages = listOf(
-            R.drawable.ic_pill, // Replace with actual pill images
-            R.drawable.ic_pill,
-            R.drawable.ic_pill
-        )
-
-        rvIncorrectPills.layoutManager = GridLayoutManager(this, 2)
-        // TODO: Create adapter for incorrect pills grid
-        // For now, just set visibility
-        rvIncorrectPills.visibility = View.VISIBLE
+    private fun markTaskAsCompleted() {
+        lifecycleScope.launch {
+            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            prescriptionIds.forEach { prescriptionId ->
+                db.medicationLogDao().insertLog(
+                    MedicationLogEntity(
+                        prescriptionId = prescriptionId,
+                        scheduledTime  = scheduleTime,
+                        completedAt    = System.currentTimeMillis(),
+                        completedDate  = currentDate
+                    )
+                )
+            }
+        }
     }
 }

@@ -151,15 +151,17 @@
             android:layout_height="80dp"
             android:indeterminateTint="#6200EE" />
 
-        <!-- Loading Text -->
+
         <TextView
+            android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Verifying medication..."
+            android:text="Analyzing pill shape..."
             android:textColor="#1A1A1A"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:gravity="center" />
 
     </LinearLayout>
 

@@ -41,18 +41,33 @@ class VerificationLoadingActivity : AppCompatActivity() {
         const val EXTRA_NO_DETECTION     = "no_detection"
 
         private const val API_KEY = "tboC49f87cK9XGbo5tbm"
-        private const val PROJECT = "panadol-pill-detection"
-        private const val VERSION = 6
-        // FIX 1: confidence=15 (was 40) — catches lower-confidence real detections
+
+        // ─────────────────────────────────────────────────────────────────
+        // TWO OPTIONS — uncomment the one you want to use:
+        //
+        // OPTION A: Roboflow Instant — works RIGHT NOW, 71% accuracy
+        //           Use this while waiting for your new model to train
+        //
+        // OPTION B: After training finishes on Roboflow servers,
+        //           replace with your new version number (e.g. /8)
+        // ─────────────────────────────────────────────────────────────────
+
+        // ✅ OPTION A — USE THIS NOW (Roboflow Instant, already hosted)
         private const val API_URL =
-            "https://detect.roboflow.com/$PROJECT/$VERSION" +
+            "https://serverless.roboflow.com/fahads-workspace-g7cbq/panadol-pill-detection-instant-1/1  ← CORRECT" +
                     "?api_key=$API_KEY&confidence=15&overlap=30"
+
+        // ⏳ OPTION B — USE THIS AFTER TRAINING COMPLETES (~30 min from now)
+        // private const val API_URL =
+        //     "https://serverless.roboflow.com/panadol-pill-detection/8" +
+        //     "?api_key=$API_KEY&confidence=5&overlap=50"
+        //                                              ↑ change 8 to your new version number
     }
 
     private val http = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     private val steps = listOf(
@@ -77,9 +92,7 @@ class VerificationLoadingActivity : AppCompatActivity() {
         val prescriptionIds = intent.getLongArrayExtra(EXTRA_PRESCRIPTION_IDS)
         val imageUriString  = intent.getStringExtra(EXTRA_IMAGE_URI)
 
-        // FIX 2: collapse "Taking Taking X" → "Taking X"
         tvTitle.text = cleanTitle(scheduleTitle)
-
         btnClose.setOnClickListener { finish() }
 
         if (imageUriString == null) {
@@ -135,9 +148,11 @@ class VerificationLoadingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 anim.cancel()
-                Log.e(TAG, "Detection failed", e)
-                tvStatus.text = "⚠️ ${e.message}"
-                delay(2000)
+                Log.e(TAG, "Detection failed: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    tvStatus.text = "⚠️ ${e.message}"
+                }
+                delay(5000) // shows error for 5 seconds so you can read it
                 sendToResults(scheduleTitle, scheduleTime, prescriptionIds,
                     imageUriString, noDetection = true)
             }
@@ -145,38 +160,69 @@ class VerificationLoadingActivity : AppCompatActivity() {
     }
 
     private fun callRoboflow(bytes: ByteArray): ApiResult {
-        // FIX 3: NO_WRAP removes newlines — Base64.DEFAULT adds \n every 76 chars
-        // which breaks Roboflow's parser and causes "Invalid base64 input" error
-        val base64Image = Base64.encodeToString(bytes, Base64.NO_WRAP)
+        // Matches Roboflow's own Swift example exactly:
+        // Step 1: image bytes → base64 String (NO_WRAP = no line breaks)
+        val base64String = Base64.encodeToString(bytes, Base64.NO_WRAP)
 
-        val body = base64Image.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
-        val req  = Request.Builder().url(API_URL).post(body).build()
+        // Step 2: base64 String → UTF-8 ByteArray (Swift: fileContent!.data(using: .utf8))
+        val postData = base64String.toByteArray(Charsets.UTF_8)
+
+        // Step 3: POST as application/x-www-form-urlencoded
+        val body = postData.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+
+        val req = Request.Builder()
+            .url(API_URL)
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .post(body)
+            .build()
+
         val resp = http.newCall(req).execute()
+        val responseBody = resp.body?.string() ?: throw Exception("Empty response from Roboflow")
+
+        Log.d(TAG, "HTTP ${resp.code} | $responseBody")
 
         if (!resp.isSuccessful)
-            throw Exception("Roboflow error ${resp.code}: ${resp.body?.string()}")
+            throw Exception("HTTP ${resp.code}: $responseBody")
 
-        val json = resp.body?.string() ?: throw Exception("Empty response")
-        Log.d(TAG, "Roboflow JSON: $json")
-        return parseJson(json)
+        return parseJson(responseBody)
     }
 
     private fun parseJson(json: String): ApiResult {
-        val preds = JSONObject(json).optJSONArray("predictions")
-        if (preds == null || preds.length() == 0) return ApiResult(noDetection = true)
+        return try {
+            val root = JSONObject(json)
 
-        val all = mutableListOf<String>()
-        var bestName = ""; var bestConf = 0.0
+            val preds = root.optJSONArray("predictions")
+                ?: root.optJSONObject("outputs")?.optJSONArray("predictions")
+                ?: root.optJSONObject("response")?.optJSONArray("predictions")
 
-        for (i in 0 until preds.length()) {
-            val p    = preds.getJSONObject(i)
-            val name = p.getString("class")
-            val conf = p.getDouble("confidence")
-            all.add(name)
-            if (conf > bestConf) { bestConf = conf; bestName = name }
+            if (preds == null || preds.length() == 0) {
+                Log.d(TAG, "No predictions. JSON: $json")
+                return ApiResult(noDetection = true)
+            }
+
+            val all = mutableListOf<String>()
+            var bestName = ""
+            var bestConf = 0.0
+
+            for (i in 0 until preds.length()) {
+                val p    = preds.getJSONObject(i)
+                val name = p.optString("class", p.optString("label", "unknown"))
+                val conf = p.optDouble("confidence", 0.0)
+                if (name.isNotEmpty() && name != "unknown") all.add(name)
+                if (conf > bestConf) { bestConf = conf; bestName = name }
+            }
+
+            if (all.isEmpty()) {
+                ApiResult(noDetection = true)
+            } else {
+                Log.d(TAG, "✅ Detected: $bestName @ ${(bestConf * 100).toInt()}% | all=$all")
+                ApiResult(bestName, (bestConf * 100).toFloat(), preds.length(), all.distinct())
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "parseJson error. JSON: $json", e)
+            throw Exception("Parse error: ${e.message}")
         }
-
-        return ApiResult(bestName, (bestConf * 100).toFloat(), preds.length(), all.distinct())
     }
 
     private fun sendToResults(

@@ -14,11 +14,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "790152497141-il2ech6e68tnriekmbtm97bs5t6pnjes.apps.googleusercontent.com",
+          "client_id": "790152497141-9kb96o1er3mknqf96ve4kts2p7dgtl76.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.medilens",
             "certificate_hash": "f6fba9202aea4bc6b3fa1e52265d6ec8e657c376"
+          }
+        },
+        {
+          "client_id": "790152497141-inluhv7jt9c40igvc0k0anq21ogc182m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.medilens",
+            "certificate_hash": "d5a7af5d9ed54419054565c3ad777c48a1508732"
           }
         },
         {

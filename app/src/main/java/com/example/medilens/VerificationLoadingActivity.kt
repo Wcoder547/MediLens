@@ -53,15 +53,15 @@ class VerificationLoadingActivity : AppCompatActivity() {
         // ─────────────────────────────────────────────────────────────────
 
         // ✅ OPTION A — USE THIS NOW (Roboflow Instant, already hosted)
-        private const val API_URL =
-            "https://serverless.roboflow.com/fahads-workspace-g7cbq/panadol-pill-detection-instant-1/1  ← CORRECT" +
-                    "?api_key=$API_KEY&confidence=15&overlap=30"
+//        private const val API_URL =
+//            "https://serverless.roboflow.com/fahads-workspace-g7cbq/panadol-pill-detection-instant-1/1  ← CORRECT" +
+//                    "?api_key=$API_KEY&confidence=15&overlap=30"
 
         // ⏳ OPTION B — USE THIS AFTER TRAINING COMPLETES (~30 min from now)
-        // private const val API_URL =
-        //     "https://serverless.roboflow.com/panadol-pill-detection/8" +
-        //     "?api_key=$API_KEY&confidence=5&overlap=50"
-        //                                              ↑ change 8 to your new version number
+         private const val API_URL =
+             "https://serverless.roboflow.com/panadol-pill-detection/9" +
+             "?api_key=$API_KEY&confidence=1&overlap=30"
+//                                                      ↑ change 9 to your new version number
     }
 
     private val http = OkHttpClient.Builder()
@@ -136,6 +136,8 @@ class VerificationLoadingActivity : AppCompatActivity() {
 
                 val result = withContext(Dispatchers.IO) { callRoboflow(bytes) }
                 anim.cancel()
+
+                Log.d(TAG, "Sending to results: noDetection=${result.noDetection}, pill=${result.pillName}")
 
                 sendToResults(
                     scheduleTitle, scheduleTime, prescriptionIds, imageUriString,
@@ -216,7 +218,13 @@ class VerificationLoadingActivity : AppCompatActivity() {
                 ApiResult(noDetection = true)
             } else {
                 Log.d(TAG, "✅ Detected: $bestName @ ${(bestConf * 100).toInt()}% | all=$all")
-                ApiResult(bestName, (bestConf * 100).toFloat(), preds.length(), all.distinct())
+                ApiResult(
+                    pillName    = bestName,
+                    confidence  = (bestConf * 100).toFloat(),
+                    pillCount   = preds.length(),
+                    allDetected = all.distinct(),
+                    noDetection = false          // ← EXPLICITLY SET FALSE
+                )
             }
 
         } catch (e: Exception) {

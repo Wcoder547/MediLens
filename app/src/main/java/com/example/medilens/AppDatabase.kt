@@ -1,26 +1,13 @@
 package com.example.medilens
 
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.content.Context
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-// MedicationLog Entity
-@Entity(tableName = "medication_logs")
-data class MedicationLogEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
-    val prescriptionId: Long,
-    val scheduledTime: String,
-    val completedAt: Long, // timestamp
-    val completedDate: String // format: "2026-02-10"
-)
 
 @Database(
     entities = [PrescriptionEntity::class, MedicationLogEntity::class],
-    version = 2, // Incremented version
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -37,7 +24,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "medilens_prescriptions.db"
-                ).fallbackToDestructiveMigration()  // For dev: wipes on schema change
+                )
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

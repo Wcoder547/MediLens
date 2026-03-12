@@ -9,11 +9,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PrescriptionDao {
+
     @Query("SELECT * FROM prescriptions ORDER BY id DESC")
     fun getAllPrescriptions(): Flow<List<PrescriptionEntity>>
 
     @Insert
-    suspend fun insert(prescription: PrescriptionEntity): Long  // Returns inserted ID
+    suspend fun insert(prescription: PrescriptionEntity): Long
 
     @Update
     suspend fun update(prescription: PrescriptionEntity)

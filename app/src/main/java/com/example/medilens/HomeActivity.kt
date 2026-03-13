@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -25,6 +26,8 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var btnLogout: ImageButton
+
+    lateinit var btnTakeNow: com.google.android.material.button.MaterialButton
     private lateinit var auth: FirebaseAuth
     private lateinit var credentialManager: CredentialManager
 
@@ -52,6 +55,8 @@ class HomeActivity : AppCompatActivity() {
 
         // Setup logout button
         btnLogout = findViewById(R.id.btnLogout)
+        btnTakeNow = findViewById(R.id.btnTakeNow)
+
         btnLogout.setOnClickListener { view ->
             showLogoutMenu(view)
         }
@@ -68,13 +73,16 @@ class HomeActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     loadFragment(HomeFragment())
+                    // btnTakeNow visibility is controlled by HomeFragment
                     true
                 }
                 R.id.nav_prescriptions -> {
+                    btnTakeNow.visibility = View.GONE   // ← hide when leaving home
                     loadFragment(PrescriptionsFragment())
                     true
                 }
                 R.id.nav_calendar -> {
+                    btnTakeNow.visibility = View.GONE   // ← hide when leaving home
                     loadFragment(CalendarFragment())
                     true
                 }

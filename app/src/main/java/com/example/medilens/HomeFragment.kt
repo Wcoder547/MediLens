@@ -24,6 +24,7 @@ class HomeFragment : Fragment() {
     private lateinit var rvDailySchedule: RecyclerView
     private lateinit var emptyStateSchedule: LinearLayout
     private lateinit var scheduleAdapter: DailyScheduleAdapter
+    private val btnTakeNow get() = (activity as? HomeActivity)?.btnTakeNow
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,9 +47,8 @@ class HomeFragment : Fragment() {
         setupUI()
         setupRecyclerView()
         loadDailySchedule()
-
-        // Reschedule all alarms on app start
         rescheduleAllAlarms()
+
     }
 
     override fun onResume() {
@@ -96,23 +96,77 @@ class HomeFragment : Fragment() {
 
     private fun loadDailySchedule() {
         lifecycleScope.launch {
-            val currentDate = getCurrentDate()
+            val currentDate    = getCurrentDate()
+            val currentCal     = Calendar.getInstance()
+            val currentMinutes = currentCal.get(Calendar.HOUR_OF_DAY) * 60 +
+                    currentCal.get(Calendar.MINUTE)
 
             db.prescriptionDao().getAllPrescriptions().collect { prescriptions ->
                 val scheduleItems = generateDailySchedule(prescriptions)
 
-                // Check completion status for each item
                 for (item in scheduleItems) {
                     item.isCompleted = isTaskCompleted(item, currentDate)
                 }
 
                 if (scheduleItems.isEmpty()) {
                     emptyStateSchedule.visibility = View.VISIBLE
-                    rvDailySchedule.visibility = View.GONE
+                    rvDailySchedule.visibility    = View.GONE
+                    btnTakeNow?.visibility        = View.GONE
                 } else {
                     emptyStateSchedule.visibility = View.GONE
-                    rvDailySchedule.visibility = View.VISIBLE
+                    rvDailySchedule.visibility    = View.VISIBLE
                     scheduleAdapter.updateList(scheduleItems)
+                }
+
+                // Find closest pending slot within ±30 minutes of now
+                val pendingItems = scheduleItems.filter { !it.isCompleted }
+
+                if (pendingItems.isNotEmpty()) {
+                    // Find the closest time slot in minutes
+                    val closestMinutes = pendingItems
+                        .minByOrNull { Math.abs(parseTime(it.time) - currentMinutes) }
+                        ?.let { parseTime(it.time) } ?: 0
+
+                    // Group ALL pending items within ±30 minutes of the closest slot
+                    val itemsForSlot = pendingItems.filter {
+                        Math.abs(parseTime(it.time) - closestMinutes) <= 30
+                    }
+
+                    // Merge all prescription IDs
+                    val allPrescriptionIds = itemsForSlot
+                        .flatMap { it.prescriptionIds }
+                        .distinct()
+                        .toLongArray()
+
+                    // Merge all medications for display in MedicationTrackingActivity
+                    val allMedications = itemsForSlot
+                        .flatMap { it.medications }
+                        .distinctBy { it.prescriptionId }
+
+                    val slotLabel = itemsForSlot.firstOrNull()
+                        ?.timeLabel?.split(" - ")?.firstOrNull() ?: "Medication"
+
+                    // Use the time of the first slot as the representative time
+                    val representativeTime = itemsForSlot
+                        .minByOrNull { parseTime(it.time) }?.time ?: ""
+
+                    // Build one combined timeLabel for display
+                    val combinedLabel = "$slotLabel - $representativeTime"
+
+                    btnTakeNow?.visibility = View.VISIBLE
+                    btnTakeNow?.text = "Take Now — $slotLabel"
+                    btnTakeNow?.setOnClickListener {
+                        val combinedItem = ScheduleItem(
+                            timeLabel       = combinedLabel,
+                            time            = representativeTime,
+                            medications     = allMedications,
+                            prescriptionIds = allPrescriptionIds.toList(),
+                            isCompleted     = false
+                        )
+                        onScheduleItemClicked(combinedItem)
+                    }
+                } else {
+                    btnTakeNow?.visibility = View.GONE
                 }
             }
         }

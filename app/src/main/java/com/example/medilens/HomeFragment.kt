@@ -156,9 +156,15 @@ class HomeFragment : Fragment() {
                     btnTakeNow?.visibility = View.VISIBLE
                     btnTakeNow?.text = "Take Now — $slotLabel"
                     btnTakeNow?.setOnClickListener {
+                        // Combine all unique times from all slots
+                        val allTimes = itemsForSlot
+                            .map { it.time }
+                            .distinct()
+                            .joinToString(",")
+
                         val combinedItem = ScheduleItem(
                             timeLabel       = combinedLabel,
-                            time            = representativeTime,
+                            time            = allTimes,
                             medications     = allMedications,
                             prescriptionIds = allPrescriptionIds.toList(),
                             isCompleted     = false

@@ -34,7 +34,6 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
     private lateinit var rvPrescriptions: RecyclerView
     private lateinit var fabAddPrescription: FloatingActionButton
     private lateinit var emptyState: LinearLayout
-    private lateinit var prescriptionsList: LinearLayout
 
     companion object {
         private const val TAG = "PrescriptionsFragment"
@@ -62,7 +61,6 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
         rvPrescriptions = view.findViewById(R.id.rvPrescriptions)
         fabAddPrescription = view.findViewById(R.id.fabAddPrescription)
         emptyState = view.findViewById(R.id.emptyState)
-        prescriptionsList = view.findViewById(R.id.prescriptionsList)
 
         setupRecyclerView()
         setupFab()
@@ -71,9 +69,45 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
 
     private fun setupRecyclerView() {
         rvPrescriptions.layoutManager = LinearLayoutManager(requireContext())
-        rvPrescriptions.adapter = PrescriptionsAdapter(emptyList()) { position ->
-            editPrescription(position)
-        }
+        rvPrescriptions.adapter = PrescriptionsAdapter(
+            prescriptions = emptyList(),
+            onEdit        = { position -> editPrescription(position) },
+            onDelete      = { position -> confirmDeletePrescription(position) }
+        )
+    }
+
+    private fun confirmDeletePrescription(position: Int) {
+        val prescription = _prescriptions.value.getOrNull(position) ?: return
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Prescription")
+            .setMessage("Delete \"${prescription.prescriptionName}\"?\n\nThis will also remove all medication reminders for ${prescription.drugName}.")
+            .setPositiveButton("Delete") { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        // 1. Cancel all alarms for this prescription
+                        MedicationAlarmManager.cancelAlarms(requireContext(), prescription)
+
+                        // 2. Delete from database
+                        prescriptionDao.delete(prescription)
+
+                        Toast.makeText(
+                            requireContext(),
+                            "✅ ${prescription.prescriptionName} deleted",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Error deleting: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun setupFab() {
@@ -92,11 +126,11 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
     private fun updateUI() {
         val list = _prescriptions.value
         if (list.isEmpty()) {
-            emptyState.visibility = View.VISIBLE
-            prescriptionsList.visibility = View.GONE
+            emptyState.visibility      = View.VISIBLE
+            rvPrescriptions.visibility = View.GONE
         } else {
-            emptyState.visibility = View.GONE
-            prescriptionsList.visibility = View.VISIBLE
+            emptyState.visibility      = View.GONE
+            rvPrescriptions.visibility = View.VISIBLE
             (rvPrescriptions.adapter as? PrescriptionsAdapter)?.updateList(list)
         }
     }

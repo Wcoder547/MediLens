@@ -371,32 +371,45 @@ class VerificationResultsActivity : AppCompatActivity() {
 
     private fun markTaskAsCompleted(onlyDetected: List<String> = emptyList()) {
         lifecycleScope.launch {
-            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            val prefs       = getSharedPreferences("medilens_prefs", MODE_PRIVATE)
-
+            val currentDate      = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val prefs            = getSharedPreferences("medilens_prefs", MODE_PRIVATE)
             val allPrescriptions = db.prescriptionDao().getAllPrescriptions().first()
+
+            // scheduleTime may be "02:26 PM,02:30 PM" — split into list
+            val sessionTimes = scheduleTime.split(",").map { it.trim() }
 
             prescriptionIds.forEach { prescriptionId ->
                 val prescription = allPrescriptions.find { it.id == prescriptionId }
 
-                // If onlyDetected is empty (manual log / no detection), mark all done
-                // If onlyDetected has values, only mark prescriptions whose drugName was detected
                 val shouldMark = onlyDetected.isEmpty() || onlyDetected.any { detected ->
                     prescription?.drugName?.contains(detected, ignoreCase = true) == true ||
                             detected.contains(prescription?.drugName ?: "", ignoreCase = true)
                 }
 
-                if (shouldMark) {
+                if (shouldMark && prescription != null) {
+                    // Find which of this prescription's times is in the session times
+                    val prescriptionTimes = listOfNotNull(
+                        prescription.time1,
+                        prescription.time2,
+                        prescription.time3
+                    )
+
+                    val matchingTime = prescriptionTimes.firstOrNull { time ->
+                        sessionTimes.any { sessionTime ->
+                            time.trim().equals(sessionTime, ignoreCase = true)
+                        }
+                    } ?: sessionTimes.firstOrNull() ?: scheduleTime
+
                     db.medicationLogDao().insertLog(
                         MedicationLogEntity(
                             prescriptionId = prescriptionId,
-                            scheduledTime  = scheduleTime,
+                            scheduledTime  = matchingTime,
                             completedAt    = System.currentTimeMillis(),
                             completedDate  = currentDate
                         )
                     )
                     prefs.edit()
-                        .putBoolean("done_${currentDate}_${scheduleTime}_${prescriptionId}", true)
+                        .putBoolean("done_${currentDate}_${matchingTime}_${prescriptionId}", true)
                         .apply()
                 }
             }

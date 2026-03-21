@@ -34,7 +34,7 @@
         android:layout_gravity="bottom"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="88dp"
+        android:layout_marginBottom="92dp"
         android:text="Take Now"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -46,7 +46,7 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="82dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
         app:itemIconTint="@color/bottom_nav_tint"

@@ -48,7 +48,7 @@ class VerificationLoadingActivity : AppCompatActivity() {
 
         private const val API_KEY = "tboC49f87cK9XGbo5tbm"
         private const val API_URL =
-            "https://serverless.roboflow.com/panadol-pill-detection/9" +
+            "https://serverless.roboflow.com/panadol-pill-detection/10" +
                     "?api_key=$API_KEY&confidence=40&overlap=30"
     }
 

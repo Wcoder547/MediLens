@@ -61,10 +61,8 @@ class MedicationAlarmReceiver : BroadcastReceiver() {
 
         // 3. Speak voice only if app is NOT in foreground
         if (!isAppInForeground(context)) {
-            speakVoiceAlert(
-                context, medicationName, medicationDosage,
-                medicationTime, isAlarm
-            )
+            val ttsHelper = MediLensTTS(context)
+            ttsHelper.speak(medicationName, medicationDosage, medicationTime, isAlarm)
         } else {
             Log.d(TAG, "App in foreground — skipping voice")
         }

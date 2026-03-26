@@ -46,6 +46,8 @@ class VerificationResultsActivity : AppCompatActivity() {
     private lateinit var btnPrevious:              MaterialButton
     private lateinit var btnFinish:                MaterialButton
     private lateinit var db:                       AppDatabase
+    private lateinit var tts: MediLensTTS
+
 
     private var scheduleTime    = ""
     private var prescriptionIds: List<Long> = emptyList()
@@ -63,6 +65,9 @@ class VerificationResultsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_verification_results)
 
         db = AppDatabase.getDatabase(this)
+
+        tts = MediLensTTS(this)
+
 
         toolbar                  = findViewById(R.id.toolbar)
         tvTitle                  = findViewById(R.id.tvTitle)
@@ -290,6 +295,11 @@ class VerificationResultsActivity : AppCompatActivity() {
                     "If you've already taken your medication correctly, tap " +
                     "\"Log Manually\" to record this dose."
         btnFinish.text = "Log Manually"
+        speak(
+            "No pills detected. Please place the medicine clearly and try again",
+            "Koi da-waa detect nahi hui. do-ba-ra koshish karein"
+        )
+
         setFinishEnabled(true)
     }
 
@@ -307,6 +317,11 @@ class VerificationResultsActivity : AppCompatActivity() {
                     "Confidence: ${confidence.toInt()}%  •  $pillCount pill${if (pillCount != 1) "s" else ""} found\n\n" +
                     (if (note.isNotEmpty()) "$note\n\n" else "") +
                     "All medications correctly placed. Tap Finish to log this dose."
+        speak(
+            "All medications are correct. You can take them now",
+            "Tamaam da-waa theek hain. Aap ab yay le sak-tay ho"
+        )
+
         setFinishEnabled(true)
     }
 
@@ -319,48 +334,165 @@ class VerificationResultsActivity : AppCompatActivity() {
     ) {
         llStatusMessage.visibility = View.VISIBLE
 
-        val matchedDrugs = prescribedDrugs.filter { prescribed ->
-            allDetected.any { detected ->
-                detected.contains(prescribed, ignoreCase = true) ||
-                        prescribed.contains(detected, ignoreCase = true)
-            }
+        // 🔹 Count detected pills
+        val detectedCountMap = mutableMapOf<String, Int>()
+        allDetected.forEach { name ->
+            val key = name.lowercase()
+            detectedCountMap[key] = (detectedCountMap[key] ?: 0) + 1
         }
-        val missingDrugs = prescribedDrugs.filter { it !in matchedDrugs }
-        val isValid      = missingDrugs.isEmpty()
 
-        if (isValid) {
-            showValidResult(pillName, confidence, pillCount)
-        } else {
-            btnFinish.text = "Finish"
-            ivStatusIcon.setImageResource(R.drawable.ic_error)
-            ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
-            tvStatusTitle.text = "Wrong medication detected!"
-            tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
+        lifecycleScope.launch {
+            val allPrescriptions = db.prescriptionDao().getAllPrescriptions().first()
+            val scheduledMeds = allPrescriptions.filter { it.id in prescriptionIds }
 
-            val detectedStr = if (allDetected.isEmpty()) "unknown" else allDetected.joinToString(", ")
-            val expectedStr = prescribedDrugs.joinToString(", ")
-            val missingStr  = if (missingDrugs.isEmpty()) "" else "\nMissing: ${missingDrugs.joinToString(", ")}"
-
-            tvStatusDescription.text =
-                "Detected: $detectedStr\n" +
-                        "Expected: $expectedStr$missingStr\n\n" +
-                        "❌ Red boxes = wrong/unexpected pills\n" +
-                        "✅ Green boxes = correct pills\n\n" +
-                        "Please check your medication before proceeding."
-
-            if (missingDrugs.isNotEmpty()) {
-                llAddMissingSection.visibility = View.VISIBLE
-                llMissingPillsList.removeAllViews()
-                missingDrugs.forEach { drug ->
-                    llMissingPillsList.addView(createMissingPillItem(drug, "1"))
-                }
-            } else {
-                llAddMissingSection.visibility = View.GONE
+            // 🔹 Expected quantities from DB
+            val expectedMap = mutableMapOf<String, Int>()
+            scheduledMeds.forEach {
+                val name = it.drugName.lowercase()
+                val qty = Regex("\\d+").find(it.dosageQuantity)?.value?.toIntOrNull() ?: 1
+                expectedMap[name] = (expectedMap[name] ?: 0) + qty
             }
-            llRemoveIncorrectSection.visibility = View.GONE
-            setFinishEnabled(false)
+
+            val missingList = mutableListOf<String>()
+            val extraList   = mutableListOf<String>()
+
+            // Step 1 — Check if expected medicines are present in correct quantity
+            for ((med, expectedQty) in expectedMap) {
+                val detectedQty = detectedCountMap.entries
+                    .filter { (detectedName, _) ->
+                        detectedName.contains(med, ignoreCase = true) ||
+                                med.contains(detectedName, ignoreCase = true)
+                    }
+                    .sumOf { it.value }
+
+                when {
+                    detectedQty == 0 ->
+                        missingList.add("$med (missing)")
+                    detectedQty < expectedQty ->
+                        missingList.add("$med (missing ${expectedQty - detectedQty} more)")
+                    detectedQty > expectedQty ->
+                        extraList.add("$med (${detectedQty - expectedQty} extra)")
+                }
+            }
+
+            // Step 2 — Check if detected medicines are NOT in prescription (unexpected pills)
+            for ((detectedName, detectedQty) in detectedCountMap) {
+                val isExpected = expectedMap.keys.any { expectedMed ->
+                    detectedName.contains(expectedMed, ignoreCase = true) ||
+                            expectedMed.contains(detectedName, ignoreCase = true)
+                }
+                if (!isExpected) {
+                    extraList.add("$detectedName (not in prescription)")
+                }
+            }
+
+            if (allDetected.isEmpty()) {
+                speak(
+                    "No pills found in the image",
+                    "Tas-veer mein koi da-waa nahi mili"
+                )
+            }
+
+            when {
+                // ── All correct, right quantities ─────────────────────────────
+                missingList.isEmpty() && extraList.isEmpty() -> {
+                    showValidResult(pillName, confidence, pillCount)
+                }
+
+                // ── Correct medicines present but extra pills also detected ───
+                missingList.isEmpty() && extraList.isNotEmpty() -> {
+                    btnFinish.text = "Finish"
+                    ivStatusIcon.setImageResource(R.drawable.ic_success)
+                    ivStatusIcon.setColorFilter(Color.parseColor("#FF9800")) // orange warning
+                    tvStatusTitle.text = "Extra pills detected! ⚠️"
+                    tvStatusTitle.setTextColor(Color.parseColor("#FF9800"))
+
+                    val extraStr = extraList.joinToString(", ")
+                    tvStatusDescription.text =
+                        "Your required medicines are all present ✅\n\n" +
+                                "Extra detected: $extraStr\n\n" +
+                                "❌ Red boxes = extra/unexpected pills — do NOT take these\n\n" +
+                                "Remove the extra pills and then tap Finish."
+
+                    speak(
+                        "Your required medicines are correct. However, extra medicines were also detected. " +
+                                "Do not take the medicines shown in red boxes.",
+                        "Aap ki zaroori da-waa theek hain. Lekin kuch extra da-waa bhi detect hui hain. " +
+                                "Laal box wali da-waa bil-kul na lo."
+                    )
+
+                    llAddMissingSection.visibility      = View.GONE
+                    llRemoveIncorrectSection.visibility = View.GONE
+                    // Allow finish since required medicines ARE present
+                    setFinishEnabled(true)
+                }
+
+                // ── Missing medicines ─────────────────────────────────────────
+                missingList.isNotEmpty() && extraList.isEmpty() -> {
+                    btnFinish.text = "Finish"
+                    ivStatusIcon.setImageResource(R.drawable.ic_error)
+                    ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
+                    tvStatusTitle.text = "Missing medicines! ❌"
+                    tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
+
+                    val friendlyMissing = missingList.joinToString(", ") { getTtsFriendlyMedicineName(it) }
+                    tvStatusDescription.text =
+                        "Missing: $friendlyMissing\n\n" +
+                                "Please add the missing medicines and retake the photo."
+
+                    speak(
+                        "Some medicines are missing: $friendlyMissing. " +
+                                "Please add the missing medicines and retake the photo.",
+                        "Kuch da-waa missing hain: $friendlyMissing " +
+                                " da-waa rakh kar do-ba-ra tasveer lo"
+                    )
+
+                    llAddMissingSection.visibility = View.VISIBLE
+                    llMissingPillsList.removeAllViews()
+                    missingList.forEach { item ->
+                        llMissingPillsList.addView(createMissingPillItem(item, ""))
+                    }
+                    llRemoveIncorrectSection.visibility = View.GONE
+                    setFinishEnabled(false)
+                }
+
+                // ── Both missing and extra ────────────────────────────────────
+                missingList.isNotEmpty() && extraList.isNotEmpty() -> {
+                    btnFinish.text = "Finish"
+                    ivStatusIcon.setImageResource(R.drawable.ic_error)
+                    ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
+                    tvStatusTitle.text = "Medication issue detected! ❌"
+                    tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
+
+                    val friendlyMissing = missingList.joinToString(", ") { getTtsFriendlyMedicineName(it) }
+                    val friendlyExtra   = extraList.joinToString(", ")   { getTtsFriendlyMedicineName(it) }
+                    tvStatusDescription.text =
+                        "Missing: $friendlyMissing\n\n" +
+                                "Extra detected: $friendlyExtra\n\n" +
+                                "❌ Red boxes = wrong/extra pills — do NOT take these\n\n" +
+                                "Please fix your medication and retake the photo."
+
+                    speak(
+                        "Some medicines are missing: $friendlyMissing. " +
+                                "Also, extra medicines were detected. " +
+                                "Do not take the medicines shown in red boxes.",
+                        "Kuch da-waa missing hain: $friendlyExtra." +
+                                "Aur kuch extra da-waa bhi detect hui hain. " +
+                                "Laal box wali da-waa bil-kul na lo"
+                    )
+
+                    llAddMissingSection.visibility = View.VISIBLE
+                    llMissingPillsList.removeAllViews()
+                    missingList.forEach { item ->
+                        llMissingPillsList.addView(createMissingPillItem(item, ""))
+                    }
+                    llRemoveIncorrectSection.visibility = View.GONE
+                    setFinishEnabled(false)
+                }
+            }
         }
     }
+
 
     private fun setFinishEnabled(enabled: Boolean) {
         btnFinish.isEnabled = enabled
@@ -368,6 +500,11 @@ class VerificationResultsActivity : AppCompatActivity() {
             this, if (enabled) R.color.purple_700 else android.R.color.darker_gray
         )
     }
+
+    private fun speak(messageEn: String, messageUr: String) {
+        tts.speakMessage("$messageEn. $messageUr")
+    }
+
 
     private fun markTaskAsCompleted(onlyDetected: List<String> = emptyList()) {
         lifecycleScope.launch {
@@ -450,4 +587,19 @@ class VerificationResultsActivity : AppCompatActivity() {
         itemView.addView(quantityText)
         return itemView
     }
+
+    fun getTtsFriendlyMedicineName(name: String): String {
+        return name.lowercase().replace("panadol", "Pana-do-l")
+            .replace("risek", "Ra-e-sik")
+            .replace("myteka", "My-tee-kaa")
+            .replace("ventolin", "Ven-to-lin")
+        // Add more rules if needed
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tts.shutdown()
+    }
+
 }

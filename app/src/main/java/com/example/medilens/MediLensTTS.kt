@@ -30,18 +30,21 @@ class MediLensTTS(private val context: Context) {
     fun speak(medicationName: String, dosage: String, time: String, isAlarm: Boolean) {
         queue.clear()
 
-        // English message
+        // 🔹 Convert medicine name BEFORE speaking
+        val friendlyName = getTtsFriendlyMedicineName(medicationName)
+
+        // English message (keep original name)
         val englishMessage = if (isAlarm) {
             "It is time to take your medication. Please take $dosage of $medicationName now."
         } else {
             "Reminder. You need to take $dosage of $medicationName in 5 minutes."
         }
 
-        // Urdu message (transliterated — TTS reads Roman Urdu well)
+        // 🔹 Urdu message (use phonetic name)
         val urduMessage = if (isAlarm) {
-            "Dawai lainay ka waqt ho gaya hai. Abhi $dosage $medicationName lain."
+            "Da-waaee lay-nay ka waqt ho gaya hai. Abhi $dosage $friendlyName lain."
         } else {
-            "Yaad dahaani. Panch minute mein $dosage $medicationName lena hai."
+            "Yaad dahaani. Paanch minute mein $dosage $friendlyName layna hai."
         }
 
         queue.add(Pair(englishMessage, Locale.ENGLISH))
@@ -50,8 +53,33 @@ class MediLensTTS(private val context: Context) {
         if (isReady) {
             flushQueue()
         }
-        // If not ready yet, queue will flush automatically when TTS initializes
     }
+
+
+    fun speakMessage(message: String) {
+        queue.clear()
+
+        // 🔹 Apply phonetic conversion to known medicine names
+        var processedMessage = message
+
+        val medicines = listOf("panadol", "risek", "myteka", "ventolin")
+
+        medicines.forEach { med ->
+            val friendly = getTtsFriendlyMedicineName(med)
+            processedMessage = processedMessage.replace(
+                med,
+                friendly,
+                ignoreCase = true
+            )
+        }
+
+        queue.add(Pair(processedMessage, Locale.ENGLISH))
+
+        if (isReady) {
+            flushQueue()
+        }
+    }
+
 
     private fun flushQueue() {
         queue.forEachIndexed { index, (text, locale) ->
@@ -81,10 +109,32 @@ class MediLensTTS(private val context: Context) {
         queue.clear()
     }
 
+    // 🔹 Convert medicine names into TTS-friendly Roman Urdu
+    private fun getTtsFriendlyMedicineName(name: String): String {
+        val clean = name.lowercase().trim()
+
+        return when {
+            clean.contains("panadol")  -> "Pana-dol"
+            clean.contains("risek")    -> "Ra-e-sik"
+            clean.contains("myteka")   -> "My-tee-ka"
+            clean.contains("ventolin") -> "Ven-to-lin"
+
+            // 🔹 Fallback (generic pronunciation improvement)
+            else -> clean
+                .replace("a", "aa")
+                .replace("e", "ee")
+                .replace("i", "ee")
+                .replace("o", "o")
+                .replace("u", "oo")
+        }
+    }
+
     fun shutdown() {
         tts?.stop()
         tts?.shutdown()
         tts = null
         isReady = false
     }
+
+
 }

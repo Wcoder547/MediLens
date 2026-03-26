@@ -33,6 +33,7 @@ class VerificationLoadingActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "VerificationLoading"
+        private lateinit var tts: MediLensTTS
 
         const val EXTRA_SCHEDULE_TITLE   = "schedule_title"
         const val EXTRA_SCHEDULE_TIME    = "schedule_time"
@@ -48,7 +49,7 @@ class VerificationLoadingActivity : AppCompatActivity() {
 
         private const val API_KEY = "tboC49f87cK9XGbo5tbm"
         private const val API_URL =
-            "https://serverless.roboflow.com/panadol-pill-detection/10" +
+            "https://serverless.roboflow.com/panadol-pill-detection/11" +
                     "?api_key=$API_KEY&confidence=40&overlap=30"
     }
 

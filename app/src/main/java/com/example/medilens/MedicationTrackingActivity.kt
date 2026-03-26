@@ -24,8 +24,7 @@ class MedicationTrackingActivity : AppCompatActivity() {
     private lateinit var llMedicationsList: LinearLayout
     private lateinit var btnLetsStart:      MaterialButton
     private lateinit var db:               AppDatabase
-
-    private var tts: TextToSpeech? = null
+    private lateinit var ttsHelper: MediLensTTS
     private val TAG = "MedicationTracking"
 
     companion object {
@@ -39,6 +38,9 @@ class MedicationTrackingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_medication_tracking)
 
         db = AppDatabase.getDatabase(this)
+
+        ttsHelper = MediLensTTS(this)
+
 
         toolbar           = findViewById(R.id.toolbar)
         tvTaskTitle       = findViewById(R.id.tvTaskTitle)
@@ -56,7 +58,7 @@ class MedicationTrackingActivity : AppCompatActivity() {
 
         btnLetsStart.setOnClickListener {
             // Stop TTS when user proceeds to camera
-            tts?.stop()
+            ttsHelper.shutdown()
             val intent = Intent(this, PhotoCaptureActivity::class.java).apply {
                 putExtra(PhotoCaptureActivity.EXTRA_SCHEDULE_TITLE, tvTaskTitle.text.toString())
                 putExtra(PhotoCaptureActivity.EXTRA_SCHEDULE_TIME,  intent.getStringExtra(EXTRA_SCHEDULE_TIME))
@@ -78,67 +80,37 @@ class MedicationTrackingActivity : AppCompatActivity() {
 
                 // Build and speak the medicine list
                 if (medications.isNotEmpty()) {
-                    speakMedicineList(medications)
+                    speakMedicineListWithHelper(medications)
                 }
             }
         }
     }
 
     // ── Speak medicine list when screen opens ─────────────────────────────
-    private fun speakMedicineList(medications: List<PrescriptionEntity>) {
-        tts = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
+    private fun speakMedicineListWithHelper(medications: List<PrescriptionEntity>) {
 
-                // Build English message
-                val medicineListEnglish = medications.joinToString(" and ") { prescription ->
-                    "${prescription.dosageQuantity} of ${prescription.drugName}"
-                }
-                val englishMsg = "Please place the following medicines for verification. $medicineListEnglish."
-
-                // Build Urdu message
-                val medicineListUrdu = medications.joinToString(" aur ") { prescription ->
-                    "${prescription.dosageQuantity} ${prescription.drugName}"
-                }
-                val urduMsg = "Abhi aapne ye dawaiyaa laini hai. $medicineListUrdu."
-
-                // Speak English first
-                tts?.setLanguage(Locale.ENGLISH)
-                tts?.speak(englishMsg, TextToSpeech.QUEUE_FLUSH, null, "tracking_eng")
-                Log.d(TAG, "Speaking: $englishMsg")
-
-                // Then Urdu
-                val urResult = tts?.setLanguage(Locale("ur"))
-                if (urResult == TextToSpeech.LANG_MISSING_DATA ||
-                    urResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    tts?.setLanguage(Locale.ENGLISH)
-                }
-                tts?.speak(urduMsg, TextToSpeech.QUEUE_ADD, null, "tracking_urdu")
-                Log.d(TAG, "Speaking Urdu: $urduMsg")
-
-                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
-                    override fun onError(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) {
-                        if (utteranceId == "tracking_urdu") {
-                            tts?.shutdown()
-                            tts = null
-                            Log.d(TAG, "TTS completed")
-                        }
-                    }
-                })
-
-            } else {
-                Log.e(TAG, "TTS init failed: $status")
-                tts?.shutdown()
-                tts = null
-            }
+        // 🔹 English message (use original names)
+        val englishList = medications.joinToString(" and ") { prescription ->
+            "${prescription.dosageQuantity} of ${prescription.drugName}"
         }
+
+        val englishMsg =
+            "Please place the following medicines for verification. $englishList."
+
+        // 🔹 Urdu message (use phonetic names via MediLensTTS internally)
+        val urduList = medications.joinToString(" aur ") { prescription ->
+            "${prescription.dosageQuantity} ${prescription.drugName}"
+        }
+
+        val urduMsg =
+            "Abhi aap nay yeh da-waa-yaan lay-ni hain. $urduList."
+
+        // 🔹 Send BOTH messages through MediLensTTS
+        ttsHelper.speakMessage("$englishMsg. $urduMsg")
     }
 
+
     override fun onDestroy() {
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
         super.onDestroy()
     }
 

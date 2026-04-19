@@ -39,6 +39,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    @Suppress("UnstableApiUsage")
+    androidResources {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
@@ -92,4 +97,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    //tensorflow
+    implementation("org.tensorflow:tensorflow-lite:2.13.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 }

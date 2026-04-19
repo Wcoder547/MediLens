@@ -103,7 +103,7 @@ class MedicationTrackingActivity : AppCompatActivity() {
         }
 
         val urduMsg =
-            "Abhi aap nay yeh da-waa-yaan lay-ni hain. $urduList."
+            "Abhi aap nay yeh da-waa lay-ni hain. $urduList."
 
         // 🔹 Send BOTH messages through MediLensTTS
         ttsHelper.speakMessage("$englishMsg. $urduMsg")

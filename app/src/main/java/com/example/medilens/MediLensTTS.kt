@@ -42,7 +42,7 @@ class MediLensTTS(private val context: Context) {
 
         // 🔹 Urdu message (use phonetic name)
         val urduMessage = if (isAlarm) {
-            "Da-waaee lay-nay ka waqt ho gaya hai. Abhi $dosage $friendlyName lain."
+            "Da-waa lay-nay ka waqt ho gaya hai. Abhi $dosage $friendlyName lo."
         } else {
             "Yaad dahaani. Paanch minute mein $dosage $friendlyName layna hai."
         }
@@ -115,9 +115,9 @@ class MediLensTTS(private val context: Context) {
 
         return when {
             clean.contains("panadol")  -> "Pana-dol"
-            clean.contains("risek")    -> "Ra-e-sik"
+            clean.contains("risek")    -> "Ra-esik"
             clean.contains("myteka")   -> "My-tee-ka"
-            clean.contains("ventolin") -> "Ven-to-lin"
+            clean.contains("ventolin") -> "Ventolin"
 
             // 🔹 Fallback (generic pronunciation improvement)
             else -> clean

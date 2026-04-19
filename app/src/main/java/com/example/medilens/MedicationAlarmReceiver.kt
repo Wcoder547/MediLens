@@ -21,6 +21,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,6 +39,12 @@ class MedicationAlarmReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        // ── GUARD: skip if no user is logged in ───────────────────────────────
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            Log.d(TAG, "No user logged in — ignoring alarm")
+            return
+        }
+        // ─────────────────────────────────────────────────────────────────────
         val medicationName   = intent.getStringExtra(EXTRA_MEDICATION_NAME)   ?: "your medication"
         val medicationTime   = intent.getStringExtra(EXTRA_MEDICATION_TIME)   ?: ""
         val medicationDosage = intent.getStringExtra(EXTRA_MEDICATION_DOSAGE) ?: "1 tablet"

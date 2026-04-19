@@ -118,52 +118,69 @@ class HomeFragment : Fragment() {
                     scheduleAdapter.updateList(scheduleItems)
                 }
 
-                // Find closest pending slot within ±30 minutes of now
+                // ── FIXED: Priority-based slot selection ──────────────────
+                // Priority 1: slot whose window contains RIGHT NOW (±30 min)
+                // Priority 2: most recent PAST pending slot (overdue, still ok)
+                // Never show FUTURE slots that haven't arrived yet
+
                 val pendingItems = scheduleItems.filter { !it.isCompleted }
 
-                if (pendingItems.isNotEmpty()) {
-                    // Find the closest time slot in minutes
-                    val closestMinutes = pendingItems
-                        .minByOrNull { Math.abs(parseTime(it.time) - currentMinutes) }
-                        ?.let { parseTime(it.time) } ?: 0
-
-                    // Group ALL pending items within ±30 minutes of the closest slot
-                    val itemsForSlot = pendingItems.filter {
-                        Math.abs(parseTime(it.time) - closestMinutes) <= 30
+                // ── Group slots that are within 60 minutes of each other into "sessions"
+// So "Morning medicine 08:00 AM" + "08:30 AM" → one combined Take Now
+                fun groupIntoSessions(items: List<ScheduleItem>): List<List<ScheduleItem>> {
+                    val sorted = items.sortedBy { parseTime(it.time) }
+                    val sessions = mutableListOf<MutableList<ScheduleItem>>()
+                    for (item in sorted) {
+                        val added = sessions.lastOrNull()?.let { session ->
+                            val lastTime = parseTime(session.last().time)
+                            val thisTime = parseTime(item.time)
+                            if (thisTime - lastTime <= 60) { session.add(item); true } else false
+                        } ?: false
+                        if (!added) sessions.add(mutableListOf(item))
                     }
+                    return sessions
+                }
 
-                    // Merge all prescription IDs
-                    val allPrescriptionIds = itemsForSlot
+                val sessions = groupIntoSessions(pendingItems)
+
+// Priority 1: session whose window contains RIGHT NOW (any slot ±60 min)
+                val currentSession = sessions.firstOrNull { session ->
+                    session.any { item ->
+                        val diff = parseTime(item.time) - currentMinutes
+                        diff in -60..60
+                    }
+                }
+
+// Priority 2: most recent PAST session (all slots more than 60 min ago)
+                val overdueSession = if (currentSession == null) {
+                    sessions
+                        .filter { session -> session.all { parseTime(it.time) < currentMinutes - 60 } }
+                        .maxByOrNull { session -> session.maxOf { parseTime(it.time) } }
+                } else null
+
+                val chosenSession = currentSession ?: overdueSession
+
+                if (chosenSession != null) {
+                    val allPrescriptionIds = chosenSession
                         .flatMap { it.prescriptionIds }
                         .distinct()
                         .toLongArray()
 
-                    // Merge all medications for display in MedicationTrackingActivity
-                    val allMedications = itemsForSlot
+                    val allMedications = chosenSession
                         .flatMap { it.medications }
                         .distinctBy { it.prescriptionId }
 
-                    val slotLabel = itemsForSlot.firstOrNull()
-                        ?.timeLabel?.split(" - ")?.firstOrNull() ?: "Medication"
+                    // Label: use the time-of-day label of the first slot (e.g. "Evening dose")
+                    val slotLabel = chosenSession.first().timeLabel.split(" - ").firstOrNull() ?: "Medication"
 
-                    // Use the time of the first slot as the representative time
-                    val representativeTime = itemsForSlot
-                        .minByOrNull { parseTime(it.time) }?.time ?: ""
-
-                    // Build one combined timeLabel for display
-                    val combinedLabel = "$slotLabel - $representativeTime"
+                    // For scheduleTime: pass ALL distinct times comma-separated
+                    val allTimes = chosenSession.map { it.time }.distinct().joinToString(",")
 
                     btnTakeNow?.visibility = View.VISIBLE
                     btnTakeNow?.text = "Take Now — $slotLabel"
                     btnTakeNow?.setOnClickListener {
-                        // Combine all unique times from all slots
-                        val allTimes = itemsForSlot
-                            .map { it.time }
-                            .distinct()
-                            .joinToString(",")
-
                         val combinedItem = ScheduleItem(
-                            timeLabel       = combinedLabel,
+                            timeLabel       = "$slotLabel - $allTimes",
                             time            = allTimes,
                             medications     = allMedications,
                             prescriptionIds = allPrescriptionIds.toList(),

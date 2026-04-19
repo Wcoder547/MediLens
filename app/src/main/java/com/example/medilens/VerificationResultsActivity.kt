@@ -8,7 +8,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -28,6 +27,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
+import android.graphics.BitmapFactory
+import android.util.Log
 
 class VerificationResultsActivity : AppCompatActivity() {
 
@@ -179,59 +180,108 @@ class VerificationResultsActivity : AppCompatActivity() {
         roboflowH: Float
     ) {
         try {
-            val rawBitmap = MediaStore.Images.Media.getBitmap(contentResolver, Uri.parse(imageUri))
+            val uri = Uri.parse(imageUri)
 
-            // Fix display rotation using EXIF
-            val rotatedBitmap = try {
-                val inputStream = contentResolver.openInputStream(Uri.parse(imageUri))
-                val exif = inputStream?.let { ExifInterface(it) }
-                val orient = exif?.getAttributeInt(
+            // ── Step 1: Decode the raw bitmap from URI (no rotation yet) ──────
+            val rawBitmap = contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream)
+            } ?: run {
+                Log.e("BBoxDebug", "Failed to decode bitmap from URI")
+                return
+            }
+
+            // ── Step 2: Apply EXACT same rotation logic as correctImageRotation() ──
+            // correctImageRotation() reads EXIF from bytes, but the URI still has
+            // original EXIF. We must mirror the EXACT same decision tree.
+            val exifOrient = contentResolver.openInputStream(uri)?.use { stream ->
+                ExifInterface(stream).getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL
-                ) ?: ExifInterface.ORIENTATION_NORMAL
+                )
+            } ?: ExifInterface.ORIENTATION_NORMAL
 
-                val matrix = Matrix()
-                when (orient) {
-                    ExifInterface.ORIENTATION_ROTATE_90  -> matrix.postRotate(90f)
-                    ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
-                    ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
-                    else -> {
-                        if (rawBitmap.width > rawBitmap.height) matrix.postRotate(90f)
-                    }
+            val matrix = Matrix()
+            var rotationApplied = false
+
+            when (exifOrient) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> {
+                    matrix.postRotate(90f); rotationApplied = true
                 }
+                ExifInterface.ORIENTATION_ROTATE_180 -> {
+                    matrix.postRotate(180f); rotationApplied = true
+                }
+                ExifInterface.ORIENTATION_ROTATE_270 -> {
+                    matrix.postRotate(270f); rotationApplied = true
+                }
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> {
+                    matrix.preScale(-1f, 1f); rotationApplied = true
+                }
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
+                    matrix.preScale(1f, -1f); rotationApplied = true
+                }
+                else -> {
+                    // Mirror the else branch in correctImageRotation():
+                    // if width > height (landscape), rotate 90°
+                    if (rawBitmap.width > rawBitmap.height) {
+                        matrix.postRotate(90f); rotationApplied = true
+                    }
+                    // else: no rotation — portrait image is already correct
+                }
+            }
+
+            val displayBitmap = if (rotationApplied) {
                 Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
-            } catch (e: Exception) {
+            } else {
                 rawBitmap
             }
 
-            val mutable = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
+            // ── Step 3: Create mutable copy for drawing ───────────────────────
+            val mutable = displayBitmap.copy(Bitmap.Config.ARGB_8888, true)
             val canvas  = Canvas(mutable)
 
-            // Scale factors: Roboflow coords → actual bitmap pixel coords
-            val scaleX = mutable.width.toFloat()  / roboflowW
+            // ── Step 4: Scale factors ─────────────────────────────────────────
+            // roboflowW/H = dimensions of the EXIF-corrected bitmap used during detection
+            // displayBitmap = same rotation applied → should match roboflowW/H
+            val scaleX = mutable.width.toFloat() / roboflowW
             val scaleY = mutable.height.toFloat() / roboflowH
 
+            Log.d("BBoxDebug", "mutable=${mutable.width}x${mutable.height} " +
+                    "roboflow=${roboflowW}x${roboflowH} " +
+                    "scale=($scaleX, $scaleY) " +
+                    "pills=${pills.size} " +
+                    "exifOrient=$exifOrient " +
+                    "rotationApplied=$rotationApplied")
+
+            // Show image even if no pills (so user sees their photo)
+            ivResultImage.setImageBitmap(mutable)
+
+            if (pills.isEmpty()) return
+
+            // ── Step 5: Draw boxes ────────────────────────────────────────────
             val strokeWidth = (mutable.width * 0.006f).coerceAtLeast(4f)
             val textSize    = (mutable.width * 0.035f).coerceAtLeast(24f)
 
             val greenPaint = Paint().apply {
-                color       = Color.parseColor("#4CAF50")
-                style       = Paint.Style.STROKE
+                color = Color.parseColor("#4CAF50")
+                style = Paint.Style.STROKE
                 this.strokeWidth = strokeWidth
                 isAntiAlias = true
             }
             val redPaint = Paint().apply {
-                color       = Color.parseColor("#F44336")
-                style       = Paint.Style.STROKE
+                color = Color.parseColor("#F44336")
+                style = Paint.Style.STROKE
                 this.strokeWidth = strokeWidth
                 isAntiAlias = true
             }
-            val bgPaint   = Paint().apply { style = Paint.Style.FILL; isAntiAlias = true }
+            val bgPaint = Paint().apply {
+                style = Paint.Style.FILL
+                isAntiAlias = true
+            }
             val textPaint = Paint().apply {
-                color          = Color.WHITE
-                this.textSize  = textSize
+                color = Color.WHITE
+                this.textSize = textSize
                 isFakeBoldText = true
-                isAntiAlias    = true
+                isAntiAlias = true
             }
 
             pills.forEach { pill ->
@@ -239,38 +289,37 @@ class VerificationResultsActivity : AppCompatActivity() {
                     pill.className.contains(prescribed, ignoreCase = true) ||
                             prescribed.contains(pill.className, ignoreCase = true)
                 }
-
                 val boxPaint   = if (isCorrect) greenPaint else redPaint
                 val labelColor = if (isCorrect) Color.parseColor("#4CAF50") else Color.parseColor("#F44336")
 
-                // Convert center-based Roboflow coords to bitmap pixel rect
+                // pill.x/y are CENTER coords in roboflowW×roboflowH space
                 val left   = (pill.x - pill.width  / 2f) * scaleX
                 val top    = (pill.y - pill.height / 2f) * scaleY
                 val right  = (pill.x + pill.width  / 2f) * scaleX
                 val bottom = (pill.y + pill.height / 2f) * scaleY
 
-                // Draw bounding box
+                Log.d("BBoxDebug", "pill=${pill.className} center=(${pill.x},${pill.y}) " +
+                        "size=${pill.width}x${pill.height} → " +
+                        "box=($left,$top,$right,$bottom)")
+
                 canvas.drawRect(RectF(left, top, right, bottom), boxPaint)
 
-                // Draw label background + text
-                val label     = "${pill.className} ${(pill.confidence * 100).toInt()}%"
-                val textW     = textPaint.measureText(label)
-                val padding   = textSize * 0.3f
-                val labelTop  = (top - textSize - padding * 2).coerceAtLeast(0f)
+                val label   = "${pill.className} ${(pill.confidence * 100).toInt()}%"
+                val textW   = textPaint.measureText(label)
+                val padding = textSize * 0.3f
+                val labelTop = (top - textSize - padding * 2).coerceAtLeast(0f)
 
                 bgPaint.color = labelColor
-                canvas.drawRect(
-                    RectF(left, labelTop, left + textW + padding * 2, top),
-                    bgPaint
-                )
+                canvas.drawRect(RectF(left, labelTop, left + textW + padding * 2, top), bgPaint)
                 canvas.drawText(label, left + padding, top - padding, textPaint)
             }
 
+            // Redraw with boxes
             ivResultImage.setImageBitmap(mutable)
 
         } catch (e: Exception) {
-            // Fallback: show original image
-            ivResultImage.setImageURI(Uri.parse(imageUri))
+            Log.e("BBoxDebug", "drawBoundingBoxes crashed: ${e.message}", e)
+            try { ivResultImage.setImageURI(Uri.parse(imageUri)) } catch (_: Exception) {}
         }
     }
 
@@ -371,7 +420,10 @@ class VerificationResultsActivity : AppCompatActivity() {
                     detectedQty < expectedQty ->
                         missingList.add("$med (missing ${expectedQty - detectedQty} more)")
                     detectedQty > expectedQty ->
-                        extraList.add("$med (${detectedQty - expectedQty} extra)")
+                        extraList.add(
+                            "$med: found $detectedQty but only $expectedQty required " +
+                                    "(remove ${detectedQty - expectedQty})"
+                        )
                 }
             }
 
@@ -415,10 +467,12 @@ class VerificationResultsActivity : AppCompatActivity() {
                                 "Remove the extra pills and then tap Finish."
 
                     speak(
-                        "Your required medicines are correct. However, extra medicines were also detected. " +
+                        "Your required medicines are correct. However, you have extra pills. " +
+                                "Extra detected: $extraStr. " +
                                 "Do not take the medicines shown in red boxes.",
                         "Aap ki zaroori da-waa theek hain. Lekin kuch extra da-waa bhi detect hui hain. " +
-                                "Laal box wali da-waa bil-kul na lo."
+                                "Extra dawaein: $extraStr. " +
+                                "Laal box wali da-waa na lo."
                     )
 
                     llAddMissingSection.visibility      = View.GONE

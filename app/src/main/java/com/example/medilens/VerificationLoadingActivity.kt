@@ -7,7 +7,7 @@ import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
+//import android.util.Base64
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
@@ -17,13 +17,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
+//import okhttp3.MediaType.Companion.toMediaTypeOrNull
+//import okhttp3.OkHttpClient
+//import okhttp3.Request
+//import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
+//import java.util.concurrent.TimeUnit
 
 class VerificationLoadingActivity : AppCompatActivity() {
 
@@ -47,17 +47,17 @@ class VerificationLoadingActivity : AppCompatActivity() {
         const val EXTRA_NO_DETECTION     = "no_detection"
         const val EXTRA_DETECTED_PILLS_JSON = "detected_pills_json"
 
-        private const val API_KEY = "tboC49f87cK9XGbo5tbm"
-        private const val API_URL =
-            "https://serverless.roboflow.com/panadol-pill-detection/11" +
-                    "?api_key=$API_KEY&confidence=40&overlap=30"
+//        private const val API_KEY = "tboC49f87cK9XGbo5tbm"
+//        private const val API_URL =
+//            "https://serverless.roboflow.com/panadol-pill-detection/11" +
+//                    "?api_key=$API_KEY&confidence=60&overlap=30"
     }
 
-    private val http = OkHttpClient.Builder()
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
-        .build()
+//    private val http = OkHttpClient.Builder()
+//        .connectTimeout(60, TimeUnit.SECONDS)
+//        .readTimeout(60, TimeUnit.SECONDS)
+//        .writeTimeout(60, TimeUnit.SECONDS)
+//        .build()
 
     private val steps = listOf(
         "Analyzing pill shape...",
@@ -173,14 +173,12 @@ class VerificationLoadingActivity : AppCompatActivity() {
                 ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
                 ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
                 ExifInterface.ORIENTATION_FLIP_VERTICAL   -> matrix.preScale(1f, -1f)
+                // In correctImageRotation(), the else block:
                 else -> {
-                    // Even if EXIF says normal, check if image is landscape
-                    // when it should be portrait — cameras often lie
                     if (original.width > original.height) {
-                        // Image is landscape but was likely taken in portrait
                         matrix.postRotate(90f)
                     } else {
-                        return bytes // truly no rotation needed
+                        return bytes // no rotation needed
                     }
                 }
             }
@@ -200,23 +198,33 @@ class VerificationLoadingActivity : AppCompatActivity() {
     }
 
     private fun callRoboflow(bytes: ByteArray): ApiResult {
-        val base64String = Base64.encodeToString(bytes, Base64.NO_WRAP)
-        val postData     = base64String.toByteArray(Charsets.UTF_8)
-        val body         = postData.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+        // ── Offline TFLite inference (replaces Roboflow API) ──────────────
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            ?: return ApiResult(noDetection = true)
 
-        val req = Request.Builder()
-            .url(API_URL)
-            .addHeader("Content-Type", "application/x-www-form-urlencoded")
-            .post(body)
-            .build()
+        val detector = PillDetector(applicationContext)
+        val pills    = detector.detect(bitmap)
+        detector.close()
 
-        val resp         = http.newCall(req).execute()
-        val responseBody = resp.body?.string() ?: throw Exception("Empty response from Roboflow")
+        if (pills.isEmpty()) {
+            Log.d(TAG, "TFLite: no detections above threshold")
+            return ApiResult(noDetection = true)
+        }
 
-        Log.d(TAG, "HTTP ${resp.code} | $responseBody")
-        if (!resp.isSuccessful) throw Exception("HTTP ${resp.code}: $responseBody")
+        val allDetected  = pills.map { it.className }
+        val bestPill     = pills.maxByOrNull { it.confidence }!!
+        Log.d(TAG, "TFLite detected: $allDetected")
 
-        return parseJson(responseBody)
+        return ApiResult(
+            pillName      = bestPill.className,
+            confidence    = bestPill.confidence * 100f,
+            pillCount     = pills.size,
+            allDetected   = allDetected,
+            noDetection   = false,
+            detectedPills = pills,
+            imageWidth    = bitmap.width.toFloat(),
+            imageHeight   = bitmap.height.toFloat()
+        )
     }
 
     private fun parseJson(json: String): ApiResult {
@@ -264,7 +272,7 @@ class VerificationLoadingActivity : AppCompatActivity() {
                 pillName      = bestName,
                 confidence    = (bestConf * 100).toFloat(),
                 pillCount     = preds.length(),
-                allDetected   = all.distinct(),
+                allDetected   = all,
                 noDetection   = false,
                 detectedPills = pills,
                 imageWidth    = imageWidth,

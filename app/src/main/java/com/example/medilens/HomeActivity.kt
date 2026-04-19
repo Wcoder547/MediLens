@@ -212,6 +212,14 @@ class HomeActivity : AppCompatActivity() {
         Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             try {
+                // ── Cancel ALL alarms before signing out ──────────────────
+                val db = AppDatabase.getDatabase(this@HomeActivity)
+                val allPrescriptions = db.prescriptionDao().getAllPrescriptions().first()
+                allPrescriptions.forEach { prescription ->
+                    MedicationAlarmManager.cancelAlarms(this@HomeActivity, prescription)
+                }
+                // ─────────────────────────────────────────────────────────
+
                 auth.signOut()
                 credentialManager.clearCredentialState(ClearCredentialStateRequest())
                 startActivity(Intent(this@HomeActivity, MainActivity::class.java).apply {

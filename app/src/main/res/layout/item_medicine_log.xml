@@ -17,7 +17,7 @@
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@layout/ic_rx"
+            android:src="@drawable/ic_rx"
             android:contentDescription="Pill"
             android:layout_gravity="center_vertical"
             android:scaleType="centerCrop" />

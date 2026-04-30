@@ -2,6 +2,7 @@ package com.example.medilens
 
 import android.app.AlertDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -31,9 +32,10 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
     private val prescriptions: StateFlow<List<PrescriptionEntity>> = _prescriptions.asStateFlow()
 
     // Views
-    private lateinit var rvPrescriptions: RecyclerView
-    private lateinit var fabAddPrescription: FloatingActionButton
-    private lateinit var emptyState: LinearLayout
+    private lateinit var rvPrescriptions:     RecyclerView
+    private lateinit var fabAddPrescription:  FloatingActionButton
+    private lateinit var fabScanPrescription: FloatingActionButton   // ← NEW
+    private lateinit var emptyState:          LinearLayout
 
     companion object {
         private const val TAG = "PrescriptionsFragment"
@@ -58,9 +60,10 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
 
         db = AppDatabase.getDatabase(requireContext())
 
-        rvPrescriptions = view.findViewById(R.id.rvPrescriptions)
-        fabAddPrescription = view.findViewById(R.id.fabAddPrescription)
-        emptyState = view.findViewById(R.id.emptyState)
+        rvPrescriptions     = view.findViewById(R.id.rvPrescriptions)
+        fabAddPrescription  = view.findViewById(R.id.fabAddPrescription)
+        fabScanPrescription = view.findViewById(R.id.fabScanPrescription)   // ← NEW
+        emptyState          = view.findViewById(R.id.emptyState)
 
         setupRecyclerView()
         setupFab()
@@ -85,18 +88,13 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
             .setPositiveButton("Delete") { _, _ ->
                 lifecycleScope.launch {
                     try {
-                        // 1. Cancel all alarms for this prescription
                         MedicationAlarmManager.cancelAlarms(requireContext(), prescription)
-
-                        // 2. Delete from database
                         prescriptionDao.delete(prescription)
-
                         Toast.makeText(
                             requireContext(),
                             "✅ ${prescription.prescriptionName} deleted",
                             Toast.LENGTH_SHORT
                         ).show()
-
                     } catch (e: Exception) {
                         Toast.makeText(
                             requireContext(),
@@ -110,8 +108,15 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
             .show()
     }
 
+    // ── FAB setup ──────────────────────────────────────────────────────────
     private fun setupFab() {
+        // Existing manual-add FAB — unchanged
         fabAddPrescription.setOnClickListener { showAddPrescriptionDialog() }
+
+        // NEW: Scan prescription FAB
+        fabScanPrescription.setOnClickListener {
+            startActivity(Intent(requireContext(), PrescriptionScanActivity::class.java))
+        }
     }
 
     private fun observePrescriptions() {
@@ -143,28 +148,22 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_add_prescription_stepper, null, false)
 
-        // Steps
         val step1 = dialogView.findViewById<View>(R.id.step1Layout)
         val step2 = dialogView.findViewById<View>(R.id.step2Layout)
         val step3 = dialogView.findViewById<View>(R.id.step3Layout)
 
-        // Buttons
         val btnPrevious = dialogView.findViewById<MaterialButton>(R.id.btnPrevious)
-        val btnNext = dialogView.findViewById<MaterialButton>(R.id.btnNext)
+        val btnNext     = dialogView.findViewById<MaterialButton>(R.id.btnNext)
 
-        // Step 1
         val etPrescriptionName = dialogView.findViewById<TextInputEditText>(R.id.etPrescriptionName)
+        val etDrugName         = dialogView.findViewById<TextInputEditText>(R.id.etDrugName)
+        val etDosageQuantity   = dialogView.findViewById<TextInputEditText>(R.id.etDosageQuantity)
+        val etTotalQuantity    = dialogView.findViewById<TextInputEditText>(R.id.etTotalQuantity)
 
-        // Step 2
-        val etDrugName = dialogView.findViewById<TextInputEditText>(R.id.etDrugName)
-        val etDosageQuantity = dialogView.findViewById<TextInputEditText>(R.id.etDosageQuantity)
-        val etTotalQuantity = dialogView.findViewById<TextInputEditText>(R.id.etTotalQuantity)
-
-        // Step 3
         val rgFrequency = dialogView.findViewById<RadioGroup>(R.id.rgFrequency)
-        val btnTime1 = dialogView.findViewById<MaterialButton>(R.id.btnTime1)
-        val btnTime2 = dialogView.findViewById<MaterialButton>(R.id.btnTime2)
-        val btnTime3 = dialogView.findViewById<MaterialButton>(R.id.btnTime3)
+        val btnTime1    = dialogView.findViewById<MaterialButton>(R.id.btnTime1)
+        val btnTime2    = dialogView.findViewById<MaterialButton>(R.id.btnTime2)
+        val btnTime3    = dialogView.findViewById<MaterialButton>(R.id.btnTime3)
 
         var currentStep = 1
         var t1: String? = null
@@ -179,7 +178,6 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
             btnNext.text = if (currentStep == 3) "Done" else "Next"
         }
 
-        // Prefill (EDIT)
         preFill?.let {
             etPrescriptionName.setText(it.prescriptionName)
             etDrugName.setText(it.drugName)
@@ -187,9 +185,9 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
             etTotalQuantity.setText(it.totalDrugQuantity)
 
             when (it.frequency) {
-                "Daily one time" -> rgFrequency.check(R.id.rbOnceDaily)
-                "Daily two times" -> rgFrequency.check(R.id.rbTwiceDaily)
-                "Daily three times" -> rgFrequency.check(R.id.rbThriceDaily)
+                "Daily one time"   -> rgFrequency.check(R.id.rbOnceDaily)
+                "Daily two times"  -> rgFrequency.check(R.id.rbTwiceDaily)
+                "Daily three times"-> rgFrequency.check(R.id.rbThriceDaily)
             }
 
             t1 = it.time1
@@ -200,20 +198,9 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
 
         fun refreshTimeButtons() {
             when (rgFrequency.checkedRadioButtonId) {
-                R.id.rbOnceDaily -> {
-                    btnTime2.visibility = View.GONE
-                    btnTime3.visibility = View.GONE
-                    t2 = null; t3 = null
-                }
-                R.id.rbTwiceDaily -> {
-                    btnTime2.visibility = View.VISIBLE
-                    btnTime3.visibility = View.GONE
-                    t3 = null
-                }
-                R.id.rbThriceDaily -> {
-                    btnTime2.visibility = View.VISIBLE
-                    btnTime3.visibility = View.VISIBLE
-                }
+                R.id.rbOnceDaily  -> { btnTime2.visibility = View.GONE;    btnTime3.visibility = View.GONE;    t2 = null; t3 = null }
+                R.id.rbTwiceDaily -> { btnTime2.visibility = View.VISIBLE; btnTime3.visibility = View.GONE;    t3 = null }
+                R.id.rbThriceDaily-> { btnTime2.visibility = View.VISIBLE; btnTime3.visibility = View.VISIBLE }
             }
             btnTime1.text = t1 ?: "Select time"
             btnTime2.text = t2 ?: "Select time"
@@ -228,7 +215,7 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
             TimePickerDialog(
                 requireContext(),
                 { _, h, m ->
-                    val amPm = if (h >= 12) "PM" else "AM"
+                    val amPm  = if (h >= 12) "PM" else "AM"
                     val hour12 = if (h % 12 == 0) 12 else h % 12
                     onPicked(String.format("%02d:%02d %s", hour12, m, amPm))
                 },
@@ -245,42 +232,39 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
         fun validateStep1() = etPrescriptionName.validateNotEmpty("Required")
         fun validateStep2() =
             etDrugName.validateNotEmpty("Required") &&
-                    etDosageQuantity.validateNotEmpty("Required") &&
-                    etTotalQuantity.validateNotEmpty("Required")
-
+            etDosageQuantity.validateNotEmpty("Required") &&
+            etTotalQuantity.validateNotEmpty("Required")
         fun validateStep3() = when (rgFrequency.checkedRadioButtonId) {
-            R.id.rbOnceDaily -> t1 != null
-            R.id.rbTwiceDaily -> t1 != null && t2 != null
+            R.id.rbOnceDaily   -> t1 != null
+            R.id.rbTwiceDaily  -> t1 != null && t2 != null
             R.id.rbThriceDaily -> t1 != null && t2 != null && t3 != null
             else -> false
         }
 
         fun buildPrescriptionEntity(): PrescriptionEntity {
             val frequency = when (rgFrequency.checkedRadioButtonId) {
-                R.id.rbOnceDaily -> "Daily one time"
-                R.id.rbTwiceDaily -> "Daily two times"
+                R.id.rbOnceDaily   -> "Daily one time"
+                R.id.rbTwiceDaily  -> "Daily two times"
                 R.id.rbThriceDaily -> "Daily three times"
-                else -> "Unknown"
+                else               -> "Unknown"
             }
             return PrescriptionEntity(
-                prescriptionName = etPrescriptionName.text.toString().trim(),
-                drugName = etDrugName.text.toString().trim(),
-                dosageQuantity = etDosageQuantity.text.toString().trim(),
+                prescriptionName  = etPrescriptionName.text.toString().trim(),
+                drugName          = etDrugName.text.toString().trim(),
+                dosageQuantity    = etDosageQuantity.text.toString().trim(),
                 totalDrugQuantity = etTotalQuantity.text.toString().trim(),
-                frequency = frequency,
-                time1 = t1,
-                time2 = t2,
-                time3 = t3
+                frequency         = frequency,
+                time1             = t1,
+                time2             = t2,
+                time3             = t3
             )
         }
 
         val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
 
         btnPrevious.setOnClickListener {
-            if (currentStep == 1) dialog.dismiss() else {
-                currentStep--
-                updateStepVisibility()
-            }
+            if (currentStep == 1) dialog.dismiss()
+            else { currentStep--; updateStepVisibility() }
         }
 
         btnNext.setOnClickListener {
@@ -292,45 +276,31 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
                     lifecycleScope.launch {
                         try {
                             if (position != null) {
-                                // UPDATE EXISTING PRESCRIPTION
                                 val original = prescriptionDao.getAllPrescriptions().first()[position]
-                                val updatedPrescription = original.copy(
-                                    prescriptionName = entity.prescriptionName,
-                                    drugName = entity.drugName,
-                                    dosageQuantity = entity.dosageQuantity,
+                                val updated  = original.copy(
+                                    prescriptionName  = entity.prescriptionName,
+                                    drugName          = entity.drugName,
+                                    dosageQuantity    = entity.dosageQuantity,
                                     totalDrugQuantity = entity.totalDrugQuantity,
-                                    frequency = entity.frequency,
-                                    time1 = entity.time1,
-                                    time2 = entity.time2,
-                                    time3 = entity.time3
+                                    frequency         = entity.frequency,
+                                    time1             = entity.time1,
+                                    time2             = entity.time2,
+                                    time3             = entity.time3
                                 )
-
-                                // Cancel old alarms
                                 MedicationAlarmManager.cancelAlarms(requireContext(), original)
-
-                                // Update in database
-                                prescriptionDao.update(updatedPrescription)
-
-                                // Schedule new alarms
-                                MedicationAlarmManager.scheduleAlarms(requireContext(), updatedPrescription)
-
-                                Log.d(TAG, "✅ Prescription updated and alarms rescheduled: ${updatedPrescription.drugName}")
+                                prescriptionDao.update(updated)
+                                MedicationAlarmManager.scheduleAlarms(requireContext(), updated)
+                                Log.d(TAG, "✅ Updated: ${updated.drugName}")
                                 Toast.makeText(requireContext(), "✅ Updated with reminders!", Toast.LENGTH_SHORT).show()
                             } else {
-                                // INSERT NEW PRESCRIPTION
-                                val prescriptionId = prescriptionDao.insert(entity)
-
-                                // Get the inserted prescription with ID
-                                val insertedPrescription = entity.copy(id = prescriptionId)
-
-                                // Schedule alarms for this prescription
-                                MedicationAlarmManager.scheduleAlarms(requireContext(), insertedPrescription)
-
-                                Log.d(TAG, "✅ Prescription saved and alarms scheduled: ${insertedPrescription.drugName}")
+                                val id       = prescriptionDao.insert(entity)
+                                val inserted = entity.copy(id = id)
+                                MedicationAlarmManager.scheduleAlarms(requireContext(), inserted)
+                                Log.d(TAG, "✅ Saved: ${inserted.drugName}")
                                 Toast.makeText(requireContext(), "✅ Added with reminders!", Toast.LENGTH_SHORT).show()
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "❌ Error saving prescription", e)
+                            Log.e(TAG, "❌ Error saving", e)
                             Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }

@@ -39,5 +39,18 @@
     <color name="success_green">#4CAF50</color>
     <color name="error_red">#F44336</color>
 
+    <color name="validation_green">#2E7D32</color>
+    <color name="validation_green_bg">#F1F8F1</color>
+    <color name="validation_amber">#E65100</color>
+    <color name="validation_amber_bg">#FFF8F1</color>
+    <color name="validation_red">#C62828</color>
+    <color name="validation_red_bg">#FFF1F1</color>
+
+    <!-- Verification badges -->
+    <color name="badge_verifiable_bg">#E3F2FD</color>
+    <color name="badge_verifiable_text">#1565C0</color>
+    <color name="badge_pending_bg">#F3E5F5</color>
+    <color name="badge_pending_text">#6A1B9A</color>
+
 
 </resources>

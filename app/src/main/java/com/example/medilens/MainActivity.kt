@@ -29,6 +29,7 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 
 
 class MainActivity : ComponentActivity() {
@@ -53,6 +54,12 @@ class MainActivity : ComponentActivity() {
         // ✅ Google Sign-In Button
         findViewById<MaterialButton>(R.id.googleButton).setOnClickListener {
             signInWithGoogle()
+        }
+
+        try {
+            PDFBoxResourceLoader.init(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("MediLens", "PDFBox init failed: ${e.message}")
         }
 
         // Optional: Sign Out Button (for testing)

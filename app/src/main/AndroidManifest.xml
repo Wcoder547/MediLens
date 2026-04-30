@@ -17,6 +17,12 @@
     <!-- Camera feature -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- 1. Inside <manifest> tag, alongside existing permissions -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- API 33+ uses READ_MEDIA_IMAGES instead -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -55,6 +61,18 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MediLens" />
+
+        <activity
+            android:name=".PrescriptionScanActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".PrescriptionConfirmActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".MainActivity"

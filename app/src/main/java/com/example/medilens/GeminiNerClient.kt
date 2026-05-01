@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
  */
 object GeminiNerClient {
 
-    private const val API_KEY = "AIzaSyAMX-4yLWLNU9Agi1sprG-rxNFMFaRA-JY"
+    private const val API_KEY = "your-api-key-here"
 
     // Model waterfall — tried in order
     private val MODELS = listOf(

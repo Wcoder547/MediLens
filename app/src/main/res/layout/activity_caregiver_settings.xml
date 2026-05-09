@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Caregiver Settings"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jab patient 1 din mein 2 baar medicine miss kare to caregiver ko automatically alert jayega."
+            android:textSize="13sp"
+            android:textColor="#888888"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Caregiver Phone Number *"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etCaregiverPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="+923001234567"
+            android:inputType="phone"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Country code ke saath likhein. SMS alert ke liye zaroori hai."
+            android:textSize="12sp"
+            android:textColor="#888888"
+            android:layout_marginBottom="24dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WhatsApp Alert — Optional"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WhatsApp alert ke liye caregiver ko ek baar yeh karna hoga:\n1. +34 694 242 562 ko WhatsApp karo\n2. Yeh message bhejo: I allow callmebot to send me messages\n3. Bot API key bhejega — woh neeche enter karo"
+            android:textSize="12sp"
+            android:textColor="#888888"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/etCallMeBotKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="CallMeBot API Key (maslan: 123456)"
+            android:inputType="text"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btnSaveCaregiver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Settings"
+            android:backgroundTint="#E53935"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:id="@+id/tvSaveStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#2E7D32"
+            android:textSize="14sp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+</ScrollView>

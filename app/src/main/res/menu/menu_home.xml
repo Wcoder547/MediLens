@@ -8,4 +8,9 @@
         android:icon="@drawable/ic_logout"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_caregiver_settings"
+        android:title="Caregiver Settings"
+        android:orderInCategory="90"/>
+
 </menu>

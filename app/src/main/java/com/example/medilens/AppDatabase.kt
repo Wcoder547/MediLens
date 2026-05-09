@@ -8,29 +8,52 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [PrescriptionEntity::class, MedicationLogEntity::class],
-    version = 3,           // ← bumped from 2
+    entities = [
+        PrescriptionEntity::class,
+        MedicationLogEntity::class,
+        AdherenceScoreEntity::class      // ← NEW
+    ],
+    version = 4,                         // ← bumped from 3
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun prescriptionDao(): PrescriptionDao
     abstract fun medicationLogDao(): MedicationLogDao
+    abstract fun adherenceScoreDao(): AdherenceScoreDao   // ← NEW
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        // ── Migration 2 → 3 ───────────────────────────────────────────────
-        // Adds verificationStatus column to existing prescriptions table.
-        // All existing rows get the safe default 'ENROLLMENT_PENDING'.
-        // No data is wiped.
+        // ── Migration 2 → 3 (existing) ────────────────────────────────────
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
                     """
                     ALTER TABLE prescriptions
                     ADD COLUMN verificationStatus TEXT NOT NULL DEFAULT 'ENROLLMENT_PENDING'
+                    """.trimIndent()
+                )
+            }
+        }
+
+        // ── Migration 3 → 4 (NEW) ─────────────────────────────────────────
+        // Creates adherence_scores table.
+        // Existing prescriptions start with score=100 (no history yet).
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS adherence_scores (
+                        prescriptionId INTEGER NOT NULL PRIMARY KEY,
+                        score INTEGER NOT NULL DEFAULT 100,
+                        streak INTEGER NOT NULL DEFAULT 0,
+                        missCountLast7 INTEGER NOT NULL DEFAULT 0,
+                        consecutiveMisses INTEGER NOT NULL DEFAULT 0,
+                        driftMinutes INTEGER NOT NULL DEFAULT 0,
+                        lastUpdated INTEGER NOT NULL DEFAULT 0
+                    )
                     """.trimIndent()
                 )
             }
@@ -43,10 +66,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "medilens_prescriptions.db"
                 )
-                    // ── Proper migrations — no data wipe ──────────────────
-                    .addMigrations(MIGRATION_2_3)
-                    // NOTE: fallbackToDestructiveMigration() deliberately removed.
-                    // If you add future phases (Phase 2 embeddings), add MIGRATION_3_4 here.
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)  // ← both migrations
                     .build()
                 INSTANCE = instance
                 instance

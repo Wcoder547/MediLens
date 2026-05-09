@@ -13,7 +13,8 @@ import com.google.android.material.chip.Chip
 class PrescriptionsAdapter(
     private var prescriptions: List<PrescriptionEntity>,
     private val onEdit: (Int) -> Unit,
-    private val onDelete: (Int) -> Unit
+    private val onDelete: (Int) -> Unit,
+    private val onScoreClick: (Int) -> Unit          // ← already existed in your file
 ) : RecyclerView.Adapter<PrescriptionsAdapter.ViewHolder>() {
 
     fun updateList(newList: List<PrescriptionEntity>) {
@@ -29,6 +30,8 @@ class PrescriptionsAdapter(
         val btnMore: ImageButton         = view.findViewById(R.id.btnMore)
         val tvPrescriptionName: TextView = view.findViewById(R.id.tvPrescriptionName)
         val btnDelete: MaterialButton    = view.findViewById(R.id.btnDelete)
+        // ── NEW: Score button (add this to item_prescription.xml too — see note below)
+        val btnScore: MaterialButton     = view.findViewById(R.id.btnScore)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -55,8 +58,10 @@ class PrescriptionsAdapter(
             )
         }
 
-        holder.btnMore.setOnClickListener { onEdit(position) }
-        holder.btnDelete.setOnClickListener { onDelete(position) }
+        holder.btnMore.setOnClickListener    { onEdit(position) }
+        holder.btnDelete.setOnClickListener  { onDelete(position) }
+        // ── NEW: wire Score button → onScoreClick lambda
+        holder.btnScore.setOnClickListener   { onScoreClick(holder.adapterPosition) }
     }
 
     override fun getItemCount() = prescriptions.size

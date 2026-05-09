@@ -75,7 +75,15 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
         rvPrescriptions.adapter = PrescriptionsAdapter(
             prescriptions = emptyList(),
             onEdit        = { position -> editPrescription(position) },
-            onDelete      = { position -> confirmDeletePrescription(position) }
+            onDelete      = { position -> confirmDeletePrescription(position) },
+            // ── ADD THIS ──────────────────────────────────────────────────
+            onScoreClick  = { position ->
+                val prescription = _prescriptions.value.getOrNull(position) ?: return@PrescriptionsAdapter
+                val intent = Intent(requireContext(), AdherenceScoreActivity::class.java)
+                intent.putExtra("prescription_id", prescription.id)
+                startActivity(intent)
+            }
+            // ──────────────────────────────────────────────────────────────
         )
     }
 

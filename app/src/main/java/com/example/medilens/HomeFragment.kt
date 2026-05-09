@@ -126,7 +126,7 @@ class HomeFragment : Fragment() {
                 val pendingItems = scheduleItems.filter { !it.isCompleted }
 
                 // ── Group slots that are within 60 minutes of each other into "sessions"
-// So "Morning medicine 08:00 AM" + "08:30 AM" → one combined Take Now
+                // So "Morning medicine 08:00 AM" + "08:30 AM" → one combined Take Now
                 fun groupIntoSessions(items: List<ScheduleItem>): List<List<ScheduleItem>> {
                     val sorted = items.sortedBy { parseTime(it.time) }
                     val sessions = mutableListOf<MutableList<ScheduleItem>>()

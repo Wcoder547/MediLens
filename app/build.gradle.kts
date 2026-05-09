@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.example.medilens"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.medilens"
@@ -18,6 +20,7 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+
     }
 
     buildTypes {
@@ -43,6 +46,22 @@ android {
     @Suppress("UnstableApiUsage")
     androidResources {
         noCompress += "tflite"
+    }
+
+    packaging {
+        resources {
+            excludes.addAll(
+                listOf(
+                    "META-INF/DEPENDENCIES",
+                    "META-INF/LICENSE",
+                    "META-INF/LICENSE.txt",
+                    "META-INF/NOTICE",
+                    "META-INF/NOTICE.txt",
+                    "META-INF/*.kotlin_module",
+                    "META-INF/versions/9/OSGI-INF/**"
+                )
+            )
+        }
     }
 }
 
@@ -101,4 +120,9 @@ dependencies {
     //tensorflow
     implementation("org.tensorflow:tensorflow-lite:2.13.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+
+    // PDF extraction (offline)
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    // Word file extraction (offline)
+
 }

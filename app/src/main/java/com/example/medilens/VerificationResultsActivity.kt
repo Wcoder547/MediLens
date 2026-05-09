@@ -602,6 +602,30 @@ class VerificationResultsActivity : AppCompatActivity() {
                     prefs.edit()
                         .putBoolean("done_${currentDate}_${matchingTime}_${prescriptionId}", true)
                         .apply()
+
+                    // ── Escalation cancel + adherence score update ────────────
+                    try {
+                        val repo = AdherenceRepository(applicationContext)
+                        val receiver = MedicationAlarmReceiver()
+
+                        // Cancel escalation chain for this dose
+                        receiver.cancelEscalationChain(
+                            applicationContext,
+                            prescriptionId,
+                            matchingTime   // correct time string already resolved above
+                        )
+
+                        // Record as taken — updates adherence score
+                        val scheduledMillis = MedicationAlarmManager
+                            .parseTime(matchingTime).timeInMillis
+                        repo.recordTaken(prescriptionId, scheduledMillis)
+
+                    } catch (e: Exception) {
+                        Log.e("MarkCompleted", "Escalation/score update failed: ${e.message}", e)
+                    }
+                    prefs.edit()
+                        .putBoolean("done_${currentDate}_${matchingTime}_${prescriptionId}", true)
+                        .apply()
                 }
             }
         }

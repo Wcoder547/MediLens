@@ -18,67 +18,82 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="20dp"
-        android:gravity="center_vertical">
+        android:orientation="horizontal">
 
-        <!-- Left side: Title and medication list -->
+        <!-- Time-of-day color strip (left side) -->
+        <View
+            android:id="@+id/viewTimeStrip"
+            android:layout_width="5dp"
+            android:layout_height="match_parent"
+            android:background="#2196F3" />
+
+        <!-- Main content -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <!-- Schedule Title with Time (Blue) -->
-            <TextView
-                android:id="@+id/tvScheduleTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#2196F3"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"
-                tools:text="Morning medicine - 12:00 PM" />
-
-            <!-- Medications List Container -->
-            <LinearLayout
-                android:id="@+id/llMedications"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <!-- Dynamic medication items will be added here -->
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Right side: Checkmark and Chevron -->
-        <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginStart="12dp">
+            android:padding="20dp"
+            android:gravity="center_vertical">
 
-            <!-- Checkmark Icon (for completed tasks) -->
-            <ImageView
-                android:id="@+id/ivCheckmark"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_check"
-                android:visibility="gone"
-                app:tint="#4CAF50"
-                android:contentDescription="Completed"
-                tools:visibility="visible" />
+            <!-- Left side: Title and medication list -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <!-- Chevron icon -->
-            <ImageView
-                android:id="@+id/ivChevron"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="#999999"
-                android:contentDescription="View details" />
+                <!-- Schedule Title with Time -->
+                <TextView
+                    android:id="@+id/tvScheduleTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#2196F3"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"
+                    tools:text="Morning medicine - 12:00 PM" />
+
+                <!-- Medications List Container -->
+                <LinearLayout
+                    android:id="@+id/llMedications"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- Dynamic medication items will be added here -->
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Right side: Checkmark and Chevron -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="12dp">
+
+                <!-- Checkmark Icon (for completed tasks) -->
+                <ImageView
+                    android:id="@+id/ivCheckmark"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_check"
+                    android:visibility="gone"
+                    app:tint="#4CAF50"
+                    android:contentDescription="Completed"
+                    tools:visibility="visible" />
+
+                <!-- Chevron icon -->
+                <ImageView
+                    android:id="@+id/ivChevron"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#999999"
+                    android:contentDescription="View details" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

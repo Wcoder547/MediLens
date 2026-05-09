@@ -39,11 +39,12 @@
             android:layout_marginBottom="12dp"
             tools:text="Morning Meds" />
 
-        <!-- Drug Name & Dosage Chips -->
+        <!-- Drug Name, Dosage Chips + Score Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_marginBottom="16dp">
 
             <com.google.android.material.chip.Chip
@@ -56,7 +57,7 @@
                 app:chipStrokeColor="@color/primary"
                 app:chipStrokeWidth="1dp"
                 style="@style/Widget.Material3.Chip.Filter"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="8dp"
                 tools:text="Paracetamol" />
 
             <com.google.android.material.chip.Chip
@@ -70,6 +71,29 @@
                 app:chipStrokeWidth="1dp"
                 style="@style/Widget.Material3.Chip.Filter"
                 tools:text="1 tablet" />
+
+            <!-- Spacer — Score button ko end mein push karta hai -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Score Button — primary color, chips jitni height -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScore"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Score"
+                android:textColor="@color/primary"
+                android:textSize="12sp"
+                android:paddingHorizontal="12dp"
+                android:minHeight="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="1dp" />
 
         </LinearLayout>
 
@@ -191,7 +215,7 @@
             android:paddingTop="8dp"
             tools:text="Take after meals" />
 
-        <!-- More Button -->
+        <!-- Delete Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDelete"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

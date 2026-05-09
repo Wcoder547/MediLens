@@ -193,6 +193,12 @@ class HomeActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_logout -> { showLogoutDialog(); true }
+                // ── ADD THIS ──────────────────────────────────────────
+                R.id.action_caregiver_settings -> {
+                    startActivity(Intent(this, CaregiverSettingsActivity::class.java))
+                    true
+                }
+                // ─────────────────────────────────────────────────────
                 else -> false
             }
         }

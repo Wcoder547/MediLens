@@ -144,7 +144,7 @@ object MedicationAlarmManager {
 
     fun parseTime(timeString: String): Calendar {
         return try {
-            val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
+            val format = SimpleDateFormat("hh:mm a", Locale.ENGLISH)
             val date   = format.parse(timeString)
             Calendar.getInstance().apply {
                 time = date ?: Date()

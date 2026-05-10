@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/bg_status_pill.xml -->
+<!-- Tint is applied programmatically in CalendarFragment -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="20dp" />
+    <solid android:color="@color/status_pending_bg" />
+</shape>

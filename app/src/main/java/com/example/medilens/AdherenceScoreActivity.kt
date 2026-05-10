@@ -43,13 +43,13 @@ class AdherenceScoreActivity : AppCompatActivity() {
 
         val (grade, color, advice) = when {
             score.score >= 80 -> Triple("Excellent ⭐", 0xFF2E7D32.toInt(),
-                "Bohat acha! Dawai waqt par lete raho.")
+                "Good! you are taking medicine on time.")
             score.score >= 60 -> Triple("Good 👍",     0xFF1565C0.toInt(),
-                "Theek hai, lekin kuch doses miss ho rahe hain.")
+                "Okay, but some doses are getting missed.")
             score.score >= 40 -> Triple("Fair ⚠️",     0xFFF57F17.toInt(),
-                "Doses miss ho rahe hain. Doctor se mashwara karein.")
+                "Doses are being missed. Consult a doctor..")
             else              -> Triple("Poor 🚨",     0xFFB71C1C.toInt(),
-                "Bohat zyada doses miss ho rahi hain! Fehran doctor se rabta karein.")
+                "Too many doses are being missed! Contact a doctor immediately.")
         }
 
         tvGrade.text = grade
@@ -57,6 +57,6 @@ class AdherenceScoreActivity : AppCompatActivity() {
         tvScore.setTextColor(color)
         tvAdvice.text  = advice
         tvStreak.text  = "🔥 Streak: ${score.streak} din"
-        tvMisses.text  = "❌ Pichle 7 din mein miss: ${score.missCountLast7}"
+        tvMisses.text  = "❌ Missed in past 7 days: ${score.missCountLast7}"
     }
 }

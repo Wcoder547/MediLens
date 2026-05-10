@@ -24,6 +24,7 @@ class HomeFragment : Fragment() {
     private lateinit var rvDailySchedule: RecyclerView
     private lateinit var emptyStateSchedule: LinearLayout
     private lateinit var scheduleAdapter: DailyScheduleAdapter
+    private var scheduleJob: kotlinx.coroutines.Job? = null
     private val btnTakeNow get() = (activity as? HomeActivity)?.btnTakeNow
 
     override fun onCreateView(
@@ -95,7 +96,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadDailySchedule() {
-        lifecycleScope.launch {
+        scheduleJob?.cancel()  // purana collector band karo
+        scheduleJob = lifecycleScope.launch {
             val currentDate    = getCurrentDate()
             val currentCal     = Calendar.getInstance()
             val currentMinutes = currentCal.get(Calendar.HOUR_OF_DAY) * 60 +

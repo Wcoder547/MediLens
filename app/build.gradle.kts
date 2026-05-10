@@ -8,6 +8,17 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use {
+        localProperties.load(it)
+    }
+}
+
+val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY") ?: ""
+
 android {
     namespace = "com.example.medilens"
     compileSdk = 37
@@ -21,6 +32,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"$geminiApiKey\""
+        )
     }
 
     buildTypes {
@@ -41,6 +57,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     @Suppress("UnstableApiUsage")
@@ -117,12 +134,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    //tensorflow
+    // TensorFlow
     implementation("org.tensorflow:tensorflow-lite:2.13.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 
-    // PDF extraction (offline)
+    // PDF extraction offline
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
-    // Word file extraction (offline)
-
 }

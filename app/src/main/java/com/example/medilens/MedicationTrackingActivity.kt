@@ -89,24 +89,18 @@ class MedicationTrackingActivity : AppCompatActivity() {
     // ── Speak medicine list when screen opens ─────────────────────────────
     private fun speakMedicineListWithHelper(medications: List<PrescriptionEntity>) {
 
-        // 🔹 English message (use original names)
         val englishList = medications.joinToString(" and ") { prescription ->
             "${prescription.dosageQuantity} of ${prescription.drugName}"
         }
+        val englishMsg = "Please place the following medicines for verification. $englishList."
 
-        val englishMsg =
-            "Please place the following medicines for verification. $englishList."
-
-        // 🔹 Urdu message (use phonetic names via MediLensTTS internally)
-        val urduList = medications.joinToString(" aur ") { prescription ->
+        val urduList = medications.joinToString(" اور ") { prescription ->
             "${prescription.dosageQuantity} ${prescription.drugName}"
         }
+        val urduMsg = "ابھی آپ کو یہ دوائیں لینی ہیں۔ $urduList۔"
 
-        val urduMsg =
-            "Abhi aap nay yeh da-waa lay-ni hain. $urduList."
-
-        // 🔹 Send BOTH messages through MediLensTTS
-        ttsHelper.speakMessage("$englishMsg. $urduMsg")
+        // English alag, Urdu alag — speed fix
+        ttsHelper.speakBoth(englishMsg, urduMsg)
     }
 
 

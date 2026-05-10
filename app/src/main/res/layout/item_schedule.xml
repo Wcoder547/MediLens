@@ -15,19 +15,18 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
-        <!-- Time-of-day color strip (left side) -->
-        <View
-            android:id="@+id/viewTimeStrip"
-            android:layout_width="5dp"
+        <!-- Sky background canvas -->
+        <com.example.medilens.SkyBackgroundView
+            android:id="@+id/skyBackground"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#2196F3" />
+            android:layerType="hardware" />
 
-        <!-- Main content -->
+        <!-- Content on top of sky -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -35,14 +34,12 @@
             android:padding="20dp"
             android:gravity="center_vertical">
 
-            <!-- Left side: Title and medication list -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- Schedule Title with Time -->
                 <TextView
                     android:id="@+id/tvScheduleTitle"
                     android:layout_width="wrap_content"
@@ -51,20 +48,16 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"
-                    tools:text="Morning medicine - 12:00 PM" />
+                    tools:text="Morning medicine - 8:00 AM" />
 
-                <!-- Medications List Container -->
                 <LinearLayout
                     android:id="@+id/llMedications"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <!-- Dynamic medication items will be added here -->
-                </LinearLayout>
+                    android:orientation="vertical" />
 
             </LinearLayout>
 
-            <!-- Right side: Checkmark and Chevron -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -72,7 +65,6 @@
                 android:gravity="center_vertical"
                 android:layout_marginStart="12dp">
 
-                <!-- Checkmark Icon (for completed tasks) -->
                 <ImageView
                     android:id="@+id/ivCheckmark"
                     android:layout_width="24dp"
@@ -84,7 +76,6 @@
                     android:contentDescription="Completed"
                     tools:visibility="visible" />
 
-                <!-- Chevron icon -->
                 <ImageView
                     android:id="@+id/ivChevron"
                     android:layout_width="24dp"
@@ -97,6 +88,6 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </FrameLayout>
 
 </com.google.android.material.card.MaterialCardView>

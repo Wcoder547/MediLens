@@ -154,12 +154,15 @@ class EscalationReceiver : BroadcastReceiver() {
     }
 
     private fun speakEscalation(context: Context, drugName: String, dosage: String, step: Int) {
-        val tts     = MediLensTTS(context)
-        val message = if (step == STEP_FIRST_ESCALATION) {
-            "Yaad dahaani. Aap ne abhi tak $dosage $drugName nahi liya. Abhi le lain."
+        val tts = MediLensTTS(context)
+        val urduMessage = if (step == STEP_FIRST_ESCALATION) {
+            "توجہ کریں۔ آپ نے ابھی تک $drugName نہیں لی۔ $dosage ابھی لے لیں۔"
         } else {
-            "Akhri yaad dahaani. $drugName lena bohot zaroori hai. Abhi le lain."
+            "آخری یاد دہانی۔ $drugName لینا ضروری ہے۔ ابھی لے لیں، ورنہ دوائی چھوٹ جائے گی۔"
         }
-        tts.speakMessage(message)
+        tts.speakBoth(
+            "Attention. Please take $dosage of $drugName now.",
+            urduMessage
+        )
     }
 }

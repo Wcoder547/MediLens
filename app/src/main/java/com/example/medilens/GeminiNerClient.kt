@@ -11,22 +11,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-/**
- * Stage 3 — Named Entity Recognition using Gemini via direct REST API.
- *
- * Model waterfall (all free tier):
- *   1. gemini-3.1-flash-lite-preview  — 500 RPD, fastest
- *   2. gemini-2.5-flash-lite          — 20 RPD fallback
- *   3. gemini-2.0-flash               — 200 RPD fallback
- *
- * On 503 or timeout: waits 8 seconds then tries next model.
- * On 429 (quota): skips immediately to next model.
- */
 object GeminiNerClient {
 
-    private const val API_KEY = "your-api-key-here"
+    private val API_KEY: String
+        get() = BuildConfig.GEMINI_API_KEY
 
-    // Model waterfall — tried in order
     private val MODELS = listOf(
         "gemini-3.1-flash-lite-preview",
         "gemini-2.0-flash",

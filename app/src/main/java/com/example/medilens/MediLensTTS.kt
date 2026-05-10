@@ -11,7 +11,6 @@ class MediLensTTS(private val context: Context) {
     private var isReady = false
     private val TAG = "MediLensTTS"
 
-    // Queue of messages to speak — (text, locale)
     private val queue = mutableListOf<Pair<String, Locale>>()
 
     init {
@@ -19,7 +18,6 @@ class MediLensTTS(private val context: Context) {
             if (status == TextToSpeech.SUCCESS) {
                 isReady = true
                 Log.d(TAG, "TTS initialized successfully")
-                // Speak any queued messages
                 flushQueue()
             } else {
                 Log.e(TAG, "TTS initialization failed with status: $status")
@@ -30,62 +28,46 @@ class MediLensTTS(private val context: Context) {
     fun speak(medicationName: String, dosage: String, time: String, isAlarm: Boolean) {
         queue.clear()
 
-        // 🔹 Convert medicine name BEFORE speaking
         val friendlyName = getTtsFriendlyMedicineName(medicationName)
 
-        // English message (keep original name)
         val englishMessage = if (isAlarm) {
             "It is time to take your medication. Please take $dosage of $medicationName now."
         } else {
             "Reminder. You need to take $dosage of $medicationName in 5 minutes."
         }
 
-        // 🔹 Urdu message (use phonetic name)
+        // اصل اردو
         val urduMessage = if (isAlarm) {
-            "Da-waa lay-nay ka waqt ho gaya hai. Abhi $dosage $friendlyName lo."
+            "دوائی لینے کا وقت ہو گیا ہے۔ ابھی $dosage $friendlyName لیں۔"
         } else {
-            "Yaad dahaani. Paanch minute mein $dosage $friendlyName layna hai."
+            "یاد دہانی۔ پانچ منٹ میں $dosage $friendlyName لینا ہے۔"
         }
 
         queue.add(Pair(englishMessage, Locale.ENGLISH))
         queue.add(Pair(urduMessage, Locale("ur")))
 
-        if (isReady) {
-            flushQueue()
-        }
+        if (isReady) flushQueue()
     }
-
 
     fun speakMessage(message: String) {
         queue.clear()
 
-        // 🔹 Apply phonetic conversion to known medicine names
         var processedMessage = message
-
         val medicines = listOf("panadol", "risek", "myteka", "ventolin")
-
         medicines.forEach { med ->
             val friendly = getTtsFriendlyMedicineName(med)
-            processedMessage = processedMessage.replace(
-                med,
-                friendly,
-                ignoreCase = true
-            )
+            processedMessage = processedMessage.replace(med, friendly, ignoreCase = true)
         }
 
-        queue.add(Pair(processedMessage, Locale.ENGLISH))
+        queue.add(Pair(processedMessage, Locale("ur")))
 
-        if (isReady) {
-            flushQueue()
-        }
+        if (isReady) flushQueue()
     }
-
 
     private fun flushQueue() {
         queue.forEachIndexed { index, (text, locale) ->
             val result = tts?.setLanguage(locale)
 
-            // If Urdu is not supported, fall back to English for Urdu message
             val finalLocale = if (result == TextToSpeech.LANG_MISSING_DATA ||
                 result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Log.w(TAG, "Locale $locale not supported, falling back to English")
@@ -109,23 +91,26 @@ class MediLensTTS(private val context: Context) {
         queue.clear()
     }
 
-    // 🔹 Convert medicine names into TTS-friendly Roman Urdu
+    fun speakBoth(englishText: String, urduText: String) {
+        queue.clear()
+        if (englishText.isNotBlank()) {
+            queue.add(Pair(englishText, Locale.ENGLISH))
+        }
+        if (urduText.isNotBlank()) {
+            queue.add(Pair(urduText, Locale("ur")))
+        }
+        if (isReady) flushQueue()
+    }
+
     private fun getTtsFriendlyMedicineName(name: String): String {
         val clean = name.lowercase().trim()
 
         return when {
-            clean.contains("panadol")  -> "Pana-dol"
-            clean.contains("risek")    -> "Ra-esik"
-            clean.contains("myteka")   -> "My-tee-ka"
-            clean.contains("ventolin") -> "Ventolin"
-
-            // 🔹 Fallback (generic pronunciation improvement)
-            else -> clean
-                .replace("a", "aa")
-                .replace("e", "ee")
-                .replace("i", "ee")
-                .replace("o", "o")
-                .replace("u", "oo")
+            clean.contains("panadol")  -> "پیناڈول"
+            clean.contains("risek")    -> "رائیسک"
+            clean.contains("myteka")   -> "مائیٹیکا"
+            clean.contains("ventolin") -> "وینٹولن"
+            else -> name
         }
     }
 
@@ -135,6 +120,4 @@ class MediLensTTS(private val context: Context) {
         tts = null
         isReady = false
     }
-
-
 }

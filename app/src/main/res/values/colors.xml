@@ -53,4 +53,15 @@
     <color name="badge_pending_text">#6A1B9A</color>
 
 
+    <!-- Status badge text colors -->
+    <color name="status_taken_text">#2E7D32</color>
+    <color name="status_missed_text">#C62828</color>
+    <color name="status_pending_text">#E65100</color>
+
+    <!-- MonthDotView dot colors -->
+    <color name="dot_green">#43A047</color>
+    <color name="dot_orange">#FB8C00</color>
+    <color name="dot_red">#E53935</color>
+    <color name="dot_gray">#BDBDBD</color>
+
 </resources>

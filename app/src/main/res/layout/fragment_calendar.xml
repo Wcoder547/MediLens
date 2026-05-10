@@ -1,73 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/surface">
 
-    <CalendarView
-        android:id="@+id/calendarView"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:dateTextAppearance="@android:style/TextAppearance.Material.Medium"
-        android:weekDayTextAppearance="@android:style/TextAppearance.Material.Caption" />
-
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@color/white">
+        android:background="@color/surface"
+        app:elevation="0dp">
 
-        <TextView
-            android:id="@+id/tvSelectedDate"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Jan 29, 2026"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/poppins_semibold"
-            android:textColor="@color/primaryText" />
+            android:orientation="vertical"
+            android:background="@color/white"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-        <TextView
-            android:layout_width="wrap_content"
+            <!-- Month navigation header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp">
+
+                <ImageButton
+                    android:id="@+id/btnPrevMonth"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="Previous month" />
+
+                <TextView
+                    android:id="@+id/tvMonthYear"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_semibold"
+                    android:textColor="@color/primaryText" />
+
+                <ImageButton
+                    android:id="@+id/btnNextMonth"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="Next month" />
+
+            </LinearLayout>
+
+            <!-- Day names row: M T W T F S S -->
+            <LinearLayout
+                android:id="@+id/llDayNames"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="4dp" />
+
+            <!-- Custom calendar grid -->
+            <com.example.medilens.CalendarGridView
+                android:id="@+id/calendarGridView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingBottom="8dp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="3 meds today"
-            android:textSize="14sp"
-            android:textColor="@color/subtext" />
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <!-- Monthly summary -->
+            <TextView
+                android:id="@+id/tvMonthlySummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:textSize="13sp"
+                android:textColor="@color/white"
+                android:background="@color/primary"
+                android:gravity="center"
+                android:fontFamily="@font/poppins_semibold" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Today's Medicines"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingStart="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp"
-        android:fontFamily="@font/poppins_semibold"
-        android:textColor="@color/primaryText" />
+            <!-- Date + count header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp"
+                android:background="@color/white"
+                android:gravity="center_vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMedicineLogs"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp" />
+                <TextView
+                    android:id="@+id/tvSelectedDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_semibold"
+                    android:textColor="@color/primaryText" />
 
-    <!-- Fixed FAB - removed problematic app:fabSize -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddMedicine"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_gravity="bottom|end"
-        android:src="@android:drawable/ic_input_add"
-        app:tint="@color/white"
-        app:backgroundTint="@color/primary" />
+                <TextView
+                    android:id="@+id/tvMedCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/subtext" />
 
-</LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Medicines"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="4dp"
+                android:fontFamily="@font/poppins_semibold"
+                android:textColor="@color/primaryText" />
+
+            <LinearLayout
+                android:id="@+id/llMedicineCards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingBottom="32dp" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

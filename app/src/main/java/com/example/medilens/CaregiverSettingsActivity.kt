@@ -33,11 +33,11 @@ class CaregiverSettingsActivity : AppCompatActivity() {
             val apiKey = etApiKey.text.toString().trim()
 
             if (phone.isEmpty()) {
-                etPhone.error = "Phone number daalna zaroori hai"
+                etPhone.error = "It is necessary to enter a phone number."
                 return@setOnClickListener
             }
             if (!phone.startsWith("+")) {
-                etPhone.error = "Country code include karo, maslan +923001234567"
+                etPhone.error = "Include country code, i.e +923001234567"
                 return@setOnClickListener
             }
 
@@ -48,7 +48,7 @@ class CaregiverSettingsActivity : AppCompatActivity() {
 
             requestSmsPermission()
 
-            tvStatus.text       = "✅ Settings save ho gayi!"
+            tvStatus.text       = "✅ Settings saved!"
             tvStatus.visibility = View.VISIBLE
         }
     }
@@ -73,11 +73,11 @@ class CaregiverSettingsActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_SMS) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "SMS permission mil gayi ✅", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "SMS permission enabled", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(
                     this,
-                    "SMS permission nahi di — sirf WhatsApp alerts jayenge",
+                    "SMS permission denied",
                     Toast.LENGTH_LONG
                 ).show()
             }

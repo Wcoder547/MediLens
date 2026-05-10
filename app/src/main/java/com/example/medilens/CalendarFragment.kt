@@ -1,118 +1,234 @@
 package com.example.medilens
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class CalendarFragment : Fragment(R.layout.fragment_calendar) {
 
-    private lateinit var calendarView: CalendarView
-    private lateinit var rvMedicineLogs: RecyclerView
-    private lateinit var tvSelectedDate: TextView
-    private lateinit var fabAddMedicine: FloatingActionButton
-    private val medicineLogs = ArrayList<MedicineLog>()
-    private val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    private lateinit var tvMonthYear:      TextView
+    private lateinit var btnPrev:          ImageButton
+    private lateinit var btnNext:          ImageButton
+    private lateinit var llDayNames:       LinearLayout
+    private lateinit var calendarGridView: CalendarGridView
+    private lateinit var tvSelectedDate:   TextView
+    private lateinit var tvMedCount:       TextView
+    private lateinit var tvMonthlySummary: TextView
+    private lateinit var llMedicineCards:  LinearLayout
+
+    private val allLogs    = mutableMapOf<String, MutableList<MedicineLog>>()
+    private val displayFmt = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    private val keyFmt     = SimpleDateFormat("yyyy-MM-dd",   Locale.getDefault())
+    private val monthFmt   = SimpleDateFormat("MMMM yyyy",    Locale.getDefault())
+
+    // Currently displayed month
+    private val displayCal = Calendar.getInstance()
+
+    // Currently selected date
+    private val selectedCal = Calendar.getInstance()
 
     data class MedicineLog(
-        val name: String,
-        val time: String,
+        val name:   String,
+        val time:   String,
         val dosage: String,
-        val status: String // "Taken", "Missed", "Pending"
+        var status: String
     )
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_calendar, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.fragment_calendar, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        calendarView = view.findViewById(R.id.calendarView)
-        rvMedicineLogs = view.findViewById(R.id.rvMedicineLogs)
-        tvSelectedDate = view.findViewById(R.id.tvSelectedDate)
-        fabAddMedicine = view.findViewById(R.id.fabAddMedicine)
+        tvMonthYear      = view.findViewById(R.id.tvMonthYear)
+        btnPrev          = view.findViewById(R.id.btnPrevMonth)
+        btnNext          = view.findViewById(R.id.btnNextMonth)
+        llDayNames       = view.findViewById(R.id.llDayNames)
+        calendarGridView = view.findViewById(R.id.calendarGridView)
+        tvSelectedDate   = view.findViewById(R.id.tvSelectedDate)
+        tvMedCount       = view.findViewById(R.id.tvMedCount)
+        tvMonthlySummary = view.findViewById(R.id.tvMonthlySummary)
+        llMedicineCards  = view.findViewById(R.id.llMedicineCards)
 
-        rvMedicineLogs.layoutManager = LinearLayoutManager(requireContext())
-        rvMedicineLogs.adapter = MedicineLogAdapter(medicineLogs)
-
-        // Sample data - replace with your DB later
         loadSampleData()
+        buildDayNameHeader()
 
-        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val selectedDate = Calendar.getInstance().apply {
-                set(year, month, dayOfMonth)
-            }
-            tvSelectedDate.text = dateFormat.format(selectedDate.time)
-            loadLogsForDate(selectedDate) // Filter logs for selected date
+        // Launch on today
+        showMonth()
+        showDay(selectedCal)
+
+        btnPrev.setOnClickListener {
+            displayCal.add(Calendar.MONTH, -1)
+            showMonth()
+        }
+        btnNext.setOnClickListener {
+            displayCal.add(Calendar.MONTH, 1)
+            showMonth()
         }
 
-        fabAddMedicine.setOnClickListener {
-
+        calendarGridView.onDayClick = { day ->
+            selectedCal.set(
+                displayCal.get(Calendar.YEAR),
+                displayCal.get(Calendar.MONTH),
+                day
+            )
+            showDay(selectedCal)
         }
     }
+
+    // ── Month header + grid ────────────────────────────────────────────────
+
+    private fun showMonth() {
+        tvMonthYear.text = monthFmt.format(displayCal.time)
+
+        val year  = displayCal.get(Calendar.YEAR)
+        val month = displayCal.get(Calendar.MONTH)
+
+        // Build dot map for this month
+        val tmp = Calendar.getInstance()
+        val dots = mutableMapOf<Int, CalendarGridView.DotColor>()
+
+        val daysInMonth = displayCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        for (d in 1..daysInMonth) {
+            tmp.set(year, month, d)
+            val logs = allLogs[keyFmt.format(tmp.time)] ?: continue
+            if (logs.isEmpty()) continue
+            val taken  = logs.count { it.status == "Taken"  }
+            val missed = logs.count { it.status == "Missed" }
+            dots[d] = when {
+                taken  == logs.size -> CalendarGridView.DotColor.GREEN
+                missed == logs.size -> CalendarGridView.DotColor.RED
+                else                -> CalendarGridView.DotColor.ORANGE
+            }
+        }
+
+        // Selected day shown only if same month
+        val selDay = if (
+            selectedCal.get(Calendar.YEAR)  == year &&
+            selectedCal.get(Calendar.MONTH) == month
+        ) selectedCal.get(Calendar.DAY_OF_MONTH) else -1
+
+        calendarGridView.setMonthData(year, month, dots, selDay)
+    }
+
+    // ── Day detail ─────────────────────────────────────────────────────────
+
+    private fun showDay(cal: Calendar) {
+        tvSelectedDate.text = displayFmt.format(cal.time)
+
+        val key  = keyFmt.format(cal.time)
+        val logs = allLogs[key] ?: emptyList()
+
+        tvMedCount.text = "${logs.size} ${if (logs.size == 1) "med" else "meds"}"
+
+        llMedicineCards.removeAllViews()
+        if (logs.isEmpty()) {
+            llMedicineCards.addView(TextView(requireContext()).apply {
+                text     = "No medicines scheduled for this day"
+                textSize = 14f
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.subtext))
+                setPadding(32, 32, 32, 32)
+            })
+        } else {
+            logs.forEachIndexed { index, log ->
+                llMedicineCards.addView(buildCard(log, key, index))
+            }
+        }
+
+        updateMonthlySummary()
+    }
+
+    // ── Medicine card ──────────────────────────────────────────────────────
+
+    private fun buildCard(log: MedicineLog, dateKey: String, logIndex: Int): View {
+        val card = LayoutInflater.from(requireContext())
+            .inflate(R.layout.item_medicine_log, llMedicineCards, false)
+
+        card.findViewById<TextView>(R.id.tvMedicineName).text = log.name
+        card.findViewById<TextView>(R.id.tvTimeDosage).text   = "${log.time} • ${log.dosage}"
+
+        val tvStatus = card.findViewById<TextView>(R.id.tvStatus)
+        tvStatus.text = log.status
+
+        val (bgCol, txtCol) = when (log.status) {
+            "Taken"  -> R.color.status_taken_bg   to R.color.status_taken_text
+            "Missed" -> R.color.status_missed_bg  to R.color.status_missed_text
+            else     -> R.color.status_pending_bg to R.color.status_pending_text
+        }
+        tvStatus.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_status_pill)
+            ?.mutate()?.also { it.setTint(ContextCompat.getColor(requireContext(), bgCol)) }
+        tvStatus.setTextColor(ContextCompat.getColor(requireContext(), txtCol))
+
+        val btnTaken = card.findViewById<Button>(R.id.btnMarkTaken)
+        btnTaken.visibility = if (log.status == "Pending") View.VISIBLE else View.GONE
+        btnTaken.setOnClickListener {
+            allLogs[dateKey]?.getOrNull(logIndex)?.status = "Taken"
+            showDay(selectedCal)
+            showMonth()     // dots update hojayein
+        }
+
+        return card
+    }
+
+    // ── Day name row: M  T  W  T  F  S  S ────────────────────────────────
+
+    private fun buildDayNameHeader() {
+        val days = listOf("M", "T", "W", "T", "F", "S", "S")
+        days.forEach { d ->
+            llDayNames.addView(TextView(requireContext()).apply {
+                text      = d
+                textSize  = 12f
+                gravity   = android.view.Gravity.CENTER
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.subtext))
+                layoutParams = LinearLayout.LayoutParams(0,
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+            })
+        }
+    }
+
+    // ── Monthly summary ────────────────────────────────────────────────────
+
+    private fun updateMonthlySummary() {
+        var total = 0; var taken = 0
+        allLogs.values.forEach { list ->
+            list.forEach { log -> total++; if (log.status == "Taken") taken++ }
+        }
+        tvMonthlySummary.text = "This month: $taken / $total doses taken"
+    }
+
+    // ── Sample data ────────────────────────────────────────────────────────
 
     private fun loadSampleData() {
-        // Simulate logs from prescriptions
-        medicineLogs.add(MedicineLog("Aspirin", "8:00 AM", "100mg", "Taken"))
-        medicineLogs.add(MedicineLog("Insulin", "12:00 PM", "10 units", "Pending"))
-        medicineLogs.add(MedicineLog("Metformin", "6:00 PM", "500mg", "Missed"))
-        (rvMedicineLogs.adapter as MedicineLogAdapter).notifyDataSetChanged()
-    }
+        val cal = Calendar.getInstance()
 
-    private fun loadLogsForDate(date: Calendar) {
-        // Filter medicineLogs for the selected date (implement with your DB)
-        // For demo, reload all
-        (rvMedicineLogs.adapter as MedicineLogAdapter).notifyDataSetChanged()
-    }
-
-}
-
-class MedicineLogAdapter(private val logs: List<CalendarFragment.MedicineLog>) : RecyclerView.Adapter<MedicineLogAdapter.ViewHolder>() {
-
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvName: TextView = view.findViewById(R.id.tvMedicineName)
-        val tvTimeDosage: TextView = view.findViewById(R.id.tvTimeDosage)
-        val tvStatus: TextView = view.findViewById(R.id.tvStatus)
-        val btnMarkTaken: Button = view.findViewById(R.id.btnMarkTaken)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_medicine_log, parent, false)
-        return ViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val log = logs[position]
-        holder.tvName.text = log.name
-        holder.tvTimeDosage.text = "${log.time} • ${log.dosage}"
-        holder.tvStatus.text = log.status
-        holder.tvStatus.setBackgroundResource(
-            when (log.status) {
-                "Taken" -> R.color.green // Define colors
-                "Missed" -> R.color.red
-                else -> R.color.orange
-            }
+        allLogs[keyFmt.format(cal.time)] = mutableListOf(
+            MedicineLog("Panadol",  "8:00 AM",  "10mg",   "Taken"),
+            MedicineLog("Myteka",   "12:00 PM", "10mg",    "Pending"),
+            MedicineLog("Ventolin", "6:00 PM",  "2 mg", "Missed")
         )
-
-        holder.btnMarkTaken.setOnClickListener {
-            // Update status to "Taken" - save to DB later
-            Toast.makeText(holder.itemView.context, "${log.name} marked as taken", Toast.LENGTH_SHORT).show()
-        }
+        cal.add(Calendar.DAY_OF_MONTH, -1)
+        allLogs[keyFmt.format(cal.time)] = mutableListOf(
+            MedicineLog("Panadol", "8:00 AM", "10mg", "Taken"),
+            MedicineLog("Risek",   "8:00 AM", "20mg",  "Taken")
+        )
+        cal.add(Calendar.DAY_OF_MONTH, -1)
+        allLogs[keyFmt.format(cal.time)] = mutableListOf(
+            MedicineLog("Panadol",  "8:00 AM", "10mg",   "Missed"),
+            MedicineLog("Ventolin", "6:00 PM", "2 mg", "Missed")
+        )
+        cal.add(Calendar.DAY_OF_MONTH, -1)
+        allLogs[keyFmt.format(cal.time)] = mutableListOf(
+            MedicineLog("Panadol", "8:00 AM", "10mg", "Taken"),
+            MedicineLog("Risek",   "8:00 AM", "20mg",  "Missed")
+        )
     }
-
-    override fun getItemCount() = logs.size
 }

@@ -60,9 +60,7 @@ object CaregiverAlertManager {
             return false
         }
 
-        val message = "MediLens Alert: Patient ne aaj $todayMissCount baar dawai miss ki. " +
-                "Aakhri miss: $scheduledTime wali $drugName. " +
-                "Meherbani karke patient se rabta karein."
+        val message = "MediLens Alert: Patient missed $todayMissCount doses today. Most recent: $drugName at $scheduledTime. Please check on the patient."
 
         val waSent = tryWhatsAppCallMeBot(context, phone, message)
         if (!waSent) {

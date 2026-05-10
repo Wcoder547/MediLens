@@ -346,7 +346,7 @@ class VerificationResultsActivity : AppCompatActivity() {
         btnFinish.text = "Log Manually"
         speak(
             "No pills detected. Please place the medicine clearly and try again",
-            "Koi da-waa detect nahi hui. do-ba-ra koshish karein"
+            "کوئی دوائی نہیں ملی۔ دوبارہ کوشش کریں۔"
         )
 
         setFinishEnabled(true)
@@ -368,7 +368,7 @@ class VerificationResultsActivity : AppCompatActivity() {
                     "All medications correctly placed. Tap Finish to log this dose."
         speak(
             "All medications are correct. You can take them now",
-            "Tamaam da-waa theek hain. Aap ab yay le sak-tay ho"
+            "تمام دوائیں درست ہیں۔ آپ ابھی لے سکتے ہیں۔"
         )
 
         setFinishEnabled(true)
@@ -441,7 +441,7 @@ class VerificationResultsActivity : AppCompatActivity() {
             if (allDetected.isEmpty()) {
                 speak(
                     "No pills found in the image",
-                    "Tas-veer mein koi da-waa nahi mili"
+                    "تصویر میں کوئی دوا نہیں ملی۔"
                 )
             }
 
@@ -470,9 +470,9 @@ class VerificationResultsActivity : AppCompatActivity() {
                         "Your required medicines are correct. However, you have extra pills. " +
                                 "Extra detected: $extraStr. " +
                                 "Do not take the medicines shown in red boxes.",
-                        "Aap ki zaroori da-waa theek hain. Lekin kuch extra da-waa bhi detect hui hain. " +
-                                "Extra dawaein: $extraStr. " +
-                                "Laal box wali da-waa na lo."
+                        "آپ کی ضروری دوائیں درست ہیں۔ لیکن کچھ اضافی دوائیں بھی ملی ہیں۔ " +
+                                "اضافی دوائیں: $extraStr۔ " +
+                                "سرخ باکس والی دوائیں بالکل نہ لیں۔"
                     )
 
                     llAddMissingSection.visibility      = View.GONE
@@ -497,8 +497,8 @@ class VerificationResultsActivity : AppCompatActivity() {
                     speak(
                         "Some medicines are missing: $friendlyMissing. " +
                                 "Please add the missing medicines and retake the photo.",
-                        "Kuch da-waa missing hain: $friendlyMissing " +
-                                " da-waa rakh kar do-ba-ra tasveer lo"
+                        "کچھ دوائیں غائب ہیں: $friendlyMissing۔ " +
+                                "دوائیں رکھ کر دوبارہ تصویر لیں۔"
                     )
 
                     llAddMissingSection.visibility = View.VISIBLE
@@ -530,9 +530,9 @@ class VerificationResultsActivity : AppCompatActivity() {
                         "Some medicines are missing: $friendlyMissing. " +
                                 "Also, extra medicines were detected. " +
                                 "Do not take the medicines shown in red boxes.",
-                        "Kuch da-waa missing hain: $friendlyExtra." +
-                                "Aur kuch extra da-waa bhi detect hui hain. " +
-                                "Laal box wali da-waa bil-kul na lo"
+                        "کچھ دوائیں غائب ہیں: $friendlyMissing۔ " +
+                                "اور کچھ اضافی دوائیں بھی ملی ہیں۔ " +
+                                "سرخ باکس والی دوائیں بالکل نہ لیں۔"
                     )
 
                     llAddMissingSection.visibility = View.VISIBLE
@@ -556,7 +556,7 @@ class VerificationResultsActivity : AppCompatActivity() {
     }
 
     private fun speak(messageEn: String, messageUr: String) {
-        tts.speakMessage("$messageEn. $messageUr")
+        tts.speakBoth(messageEn, messageUr)
     }
 
 
@@ -667,11 +667,11 @@ class VerificationResultsActivity : AppCompatActivity() {
     }
 
     fun getTtsFriendlyMedicineName(name: String): String {
-        return name.lowercase().replace("panadol", "Pana-do-l")
-            .replace("risek", "Ra-e-sik")
-            .replace("myteka", "My-tee-kaa")
-            .replace("ventolin", "Ven-to-lin")
-        // Add more rules if needed
+        return name.lowercase()
+            .replace("panadol",  "پیناڈول")
+            .replace("risek",    "رائیسک")
+            .replace("myteka",   "مائیٹیکا")
+            .replace("ventolin", "وینٹولن")
     }
 
 

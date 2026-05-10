@@ -13,9 +13,23 @@ composeBom = "2024.09.00"
 kotlinxCoroutinesAndroid = "1.8.1"
 material = "1.13.0"
 firebaseAuth = "24.0.1"
-credentials = "1.5.0"
-credentialsPlayServicesAuth = "1.5.0"
-googleid = "1.1.1"
+firebaseBom = "34.12.0"
+credentials = "1.6.0"
+credentialsPlayServicesAuth = "1.6.0"
+googleid = "1.2.0"
+playServicesAuth = "21.5.1"
+fragmentKtx = "1.8.9"
+appcompat = "1.7.1"
+constraintlayout = "2.2.1"
+cardview = "1.0.0"
+okhttp = "5.3.2"
+coil = "2.7.0"
+exifinterface = "1.4.2"
+tensorflowLite = "2.17.0"
+tensorflowLiteSupport = "0.5.0"
+pdfbox = "2.0.27.0"
+poiOoxml = "5.5.1"
+generativeai = "0.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,7 +51,22 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+tensorflow-lite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tensorflowLite" }
+tensorflow-lite-support = { group = "org.tensorflow", name = "tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
+pdfbox-android = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfbox" }
+poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "poiOoxml" }
+generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }

@@ -22,7 +22,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Jab patient 1 din mein 2 baar medicine miss kare to caregiver ko automatically alert jayega."
+            android:text="An automatic alert will be sent to the caregiver if the patient misses two doses in a single day."
             android:textSize="13sp"
             android:textColor="#888888"
             android:layout_marginBottom="24dp"/>
@@ -45,7 +45,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Country code ke saath likhein. SMS alert ke liye zaroori hai."
+            android:text="Include country code. Required for SMS alerts."
             android:textSize="12sp"
             android:textColor="#888888"
             android:layout_marginBottom="24dp"/>
@@ -66,7 +66,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="WhatsApp alert ke liye caregiver ko ek baar yeh karna hoga:\n1. +34 694 242 562 ko WhatsApp karo\n2. Yeh message bhejo: I allow callmebot to send me messages\n3. Bot API key bhejega — woh neeche enter karo"
+            android:text="To receive WhatsApp alerts, the caregiver needs to follow these steps once:\n1. Send a WhatsApp message to +34 694 242 562.\n2. Send the message: I allow callmebot to send me messages.\n3. The bot will send an API key — enter that key below."
             android:textSize="12sp"
             android:textColor="#888888"
             android:layout_marginBottom="8dp"/>
@@ -75,7 +75,7 @@
             android:id="@+id/etCallMeBotKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="CallMeBot API Key (maslan: 123456)"
+            android:hint="CallMeBot API Key (i.e: 123456)"
             android:inputType="text"
             android:layout_marginBottom="24dp"/>
 

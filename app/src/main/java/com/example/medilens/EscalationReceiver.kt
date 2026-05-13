@@ -65,7 +65,7 @@ class EscalationReceiver : BroadcastReceiver() {
                 STEP_FIRST_ESCALATION -> {
                     showEscalationNotification(
                         context, prescriptionId, drugName, dosage, scheduledTime,
-                        title   = "⚠️ Still not taken: $drugName",
+                        title   = "Still not taken: $drugName",
                         message = "You missed your $scheduledTime dose. Take $dosage of $drugName now.",
                         notifId = "$prescriptionId$scheduledTime-esc1".hashCode()
                     )
@@ -75,7 +75,7 @@ class EscalationReceiver : BroadcastReceiver() {
                 STEP_SECOND_ESCALATION -> {
                     showEscalationNotification(
                         context, prescriptionId, drugName, dosage, scheduledTime,
-                        title   = "🚨 Last chance: $drugName",
+                        title   = "⚠️ Last chance: $drugName",
                         message = "Final reminder — take $dosage of $drugName now or it will be marked missed.",
                         notifId = "$prescriptionId$scheduledTime-esc2".hashCode()
                     )

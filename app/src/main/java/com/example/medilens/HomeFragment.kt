@@ -179,7 +179,7 @@ class HomeFragment : Fragment() {
                     val allTimes = chosenSession.map { it.time }.distinct().joinToString(",")
 
                     btnTakeNow?.visibility = View.VISIBLE
-                    btnTakeNow?.text = "Take Now — $slotLabel"
+                    btnTakeNow?.text = "Take Now $slotLabel"
                     btnTakeNow?.setOnClickListener {
                         val combinedItem = ScheduleItem(
                             timeLabel       = "$slotLabel - $allTimes",

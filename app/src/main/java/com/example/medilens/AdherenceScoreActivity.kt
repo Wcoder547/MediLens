@@ -56,7 +56,7 @@ class AdherenceScoreActivity : AppCompatActivity() {
         tvGrade.setTextColor(color)
         tvScore.setTextColor(color)
         tvAdvice.text  = advice
-        tvStreak.text  = "🔥 Streak: ${score.streak} din"
-        tvMisses.text  = "❌ Missed in past 7 days: ${score.missCountLast7}"
+        tvStreak.text  = "Streak: ${score.streak} din"
+        tvMisses.text  = "Missed in past 7 days: ${score.missCountLast7}"
     }
 }

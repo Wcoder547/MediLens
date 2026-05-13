@@ -222,7 +222,7 @@ class MedicationAlarmReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_REMINDER)
             .setSmallIcon(R.drawable.ic_pill)
             .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.logo))
-            .setContentTitle("MediLens — Upcoming Medication")
+            .setContentTitle("MediLens Upcoming Medication")
             .setContentText("In 5 minutes: Take $dosage of $medicationName")
             .setStyle(NotificationCompat.BigTextStyle().bigText(
                 "In 5 minutes you need to take:\n$dosage of $medicationName\nScheduled at $time"))

@@ -165,7 +165,7 @@ class PrescriptionScanActivity : AppCompatActivity() {
                 } catch (geminiError: Exception) {
                     // Gemini failed — try rule engine offline fallback
                     android.util.Log.e("GeminiNER", "Gemini failed: ${geminiError.message}", geminiError)
-                    updateProgress("AI unavailable — using offline parser…")
+                    updateProgress("AI unavailable, using offline parser…")
                     val fallback = RuleEngineParser.parse(rawText)
                     if (fallback.isEmpty()) {
                         showError("Could not identify any medicines.\n\nPlease check the prescription and try again, or add medicines manually.")
@@ -226,10 +226,10 @@ class PrescriptionScanActivity : AppCompatActivity() {
     }
 
     private fun mimeTypeLabel(mimeType: String): String = when {
-        mimeType.startsWith("image/") -> "📷 Image"
-        mimeType == "application/pdf" -> "📄 PDF Document"
-        mimeType.contains("word") || mimeType.contains("openxml") -> "📝 Word Document"
-        else -> "📁 $mimeType"
+        mimeType.startsWith("image/") -> "Image"
+        mimeType == "application/pdf" -> "PDF Document"
+        mimeType.contains("word") || mimeType.contains("openxml") -> "Word Document"
+        else -> "$mimeType"
     }
 
     private fun fileIcon(mimeType: String): Int = when {

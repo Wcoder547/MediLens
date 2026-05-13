@@ -100,7 +100,7 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
                         prescriptionDao.delete(prescription)
                         Toast.makeText(
                             requireContext(),
-                            "✅ ${prescription.prescriptionName} deleted",
+                            "${prescription.prescriptionName} deleted",
                             Toast.LENGTH_SHORT
                         ).show()
                     } catch (e: Exception) {
@@ -298,17 +298,17 @@ class PrescriptionsFragment : Fragment(R.layout.fragment_prescriptions) {
                                 MedicationAlarmManager.cancelAlarms(requireContext(), original)
                                 prescriptionDao.update(updated)
                                 MedicationAlarmManager.scheduleAlarms(requireContext(), updated)
-                                Log.d(TAG, "✅ Updated: ${updated.drugName}")
-                                Toast.makeText(requireContext(), "✅ Updated with reminders!", Toast.LENGTH_SHORT).show()
+                                Log.d(TAG, "Updated: ${updated.drugName}")
+                                Toast.makeText(requireContext(), "Updated with reminders!", Toast.LENGTH_SHORT).show()
                             } else {
                                 val id       = prescriptionDao.insert(entity)
                                 val inserted = entity.copy(id = id)
                                 MedicationAlarmManager.scheduleAlarms(requireContext(), inserted)
-                                Log.d(TAG, "✅ Saved: ${inserted.drugName}")
-                                Toast.makeText(requireContext(), "✅ Added with reminders!", Toast.LENGTH_SHORT).show()
+                                Log.d(TAG, "Saved: ${inserted.drugName}")
+                                Toast.makeText(requireContext(), "Added with reminders!", Toast.LENGTH_SHORT).show()
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "❌ Error saving", e)
+                            Log.e(TAG, "Error saving", e)
                             Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }

@@ -48,7 +48,7 @@ class CaregiverSettingsActivity : AppCompatActivity() {
 
             requestSmsPermission()
 
-            tvStatus.text       = "✅ Settings saved!"
+            tvStatus.text       = "Settings saved!"
             tvStatus.visibility = View.VISIBLE
         }
     }

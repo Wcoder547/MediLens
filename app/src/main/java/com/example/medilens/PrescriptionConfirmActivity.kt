@@ -137,7 +137,7 @@ class PrescriptionConfirmActivity : AppCompatActivity() {
             if (savedCount > 0) {
                 Toast.makeText(
                     this@PrescriptionConfirmActivity,
-                    "✅ $savedCount medicine${if (savedCount > 1) "s" else ""} saved with reminders!",
+                    "$savedCount medicine${if (savedCount > 1) "s" else ""} saved with reminders!",
                     Toast.LENGTH_LONG
                 ).show()
                 finish()

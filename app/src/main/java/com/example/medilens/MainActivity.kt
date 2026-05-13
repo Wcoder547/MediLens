@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            Log.d(TAG, "✅ User already signed in: ${currentUser.displayName}")
+            Log.d(TAG, "User already signed in: ${currentUser.displayName}")
             navigateToHome(currentUser)
         } else {
             Log.d(TAG, "ℹ️ No user signed in yet.")
@@ -103,24 +103,24 @@ class MainActivity : ComponentActivity() {
                     request = request,
                     context = this@MainActivity
                 )
-                Log.d(TAG, "✅ Credential received successfully")
+                Log.d(TAG, "Credential received successfully")
                 handleSignIn(result)
             } catch (e: NoCredentialException) {
-                Log.e(TAG, "❌ No credentials available", e)
+                Log.e(TAG, "No credentials available", e)
                 Toast.makeText(
                     this@MainActivity,
                     "No Google accounts found. Please add an account.",
                     Toast.LENGTH_LONG
                 ).show()
             } catch (e: GetCredentialException) {
-                Log.e(TAG, "❌ Sign-in failed: ${e.message}", e)
+                Log.e(TAG, "Sign-in failed: ${e.message}", e)
                 Toast.makeText(
                     this@MainActivity,
                     "Google Sign-In failed: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Unexpected error: ${e.message}", e)
+                Log.e(TAG, "Unexpected error: ${e.message}", e)
                 Toast.makeText(
                     this@MainActivity,
                     "An unexpected error occurred",
@@ -149,29 +149,29 @@ class MainActivity : ComponentActivity() {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val idToken = googleIdTokenCredential.idToken
 
-                        Log.d(TAG, "✅ Got Google ID Token")
-                        Log.d(TAG, "📧 User Email: ${googleIdTokenCredential.id}")
-                        Log.d(TAG, "👤 Display Name: ${googleIdTokenCredential.displayName}")
+                        Log.d(TAG, "Got Google ID Token")
+                        Log.d(TAG, "User Email: ${googleIdTokenCredential.id}")
+                        Log.d(TAG, "Display Name: ${googleIdTokenCredential.displayName}")
 
                         if (idToken.isNotEmpty()) {
                             firebaseAuthWithGoogle(idToken)
                         } else {
-                            Log.e(TAG, "❌ ID token is empty!")
+                            Log.e(TAG, "ID token is empty!")
                             Toast.makeText(this, "Invalid ID token", Toast.LENGTH_SHORT).show()
                         }
 
                     } catch (e: GoogleIdTokenParsingException) {
-                        Log.e(TAG, "❌ GoogleIdTokenCredential parsing error", e)
+                        Log.e(TAG, "GoogleIdTokenCredential parsing error", e)
                         Toast.makeText(this, "Failed to parse Google credentials", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Log.w(TAG, "❌ Unexpected credential type: ${credential.type}")
+                    Log.w(TAG, "Unexpected credential type: ${credential.type}")
                     Toast.makeText(this, "Invalid credential type", Toast.LENGTH_SHORT).show()
                 }
             }
 
             else -> {
-                Log.w(TAG, "❌ Unexpected credential class: ${credential::class.simpleName}")
+                Log.w(TAG, "Unexpected credential class: ${credential::class.simpleName}")
                 Toast.makeText(this, "Unexpected credential format", Toast.LENGTH_SHORT).show()
             }
         }
@@ -186,9 +186,9 @@ class MainActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    Log.d(TAG, "✅ Firebase Authentication successful")
-                    Log.d(TAG, "👤 User: ${user?.displayName} (${user?.email})")
-                    Log.d(TAG, "🆔 UID: ${user?.uid}")
+                    Log.d(TAG, "Firebase Authentication successful")
+                    Log.d(TAG, "User: ${user?.displayName} (${user?.email})")
+                    Log.d(TAG, "UID: ${user?.uid}")
 
                     Toast.makeText(
                         this,
@@ -200,7 +200,7 @@ class MainActivity : ComponentActivity() {
                 } else {
                     // Handle specific Firebase Auth errors
                     val errorCode = task.exception?.message
-                    Log.e(TAG, "❌ Firebase Authentication failed: $errorCode", task.exception)
+                    Log.e(TAG, "Firebase Authentication failed: $errorCode", task.exception)
 
                     val errorMessage = when {
                         errorCode?.contains("network", ignoreCase = true) == true ->
@@ -242,7 +242,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 credentialManager.clearCredentialState(ClearCredentialStateRequest())
-                Log.d(TAG, "✅ Credentials cleared successfully")
+                Log.d(TAG, "Credentials cleared successfully")
                 updateUI(null)
                 Toast.makeText(
                     this@MainActivity,
@@ -250,7 +250,7 @@ class MainActivity : ComponentActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             } catch (e: ClearCredentialException) {
-                Log.e(TAG, "❌ Error clearing credentials: ${e.message}", e)
+                Log.e(TAG, "Error clearing credentials: ${e.message}", e)
                 Toast.makeText(
                     this@MainActivity,
                     "Error during sign out",
@@ -263,11 +263,11 @@ class MainActivity : ComponentActivity() {
     // 🔹 Update UI after login/logout
     private fun updateUI(user: FirebaseUser?) {
         if (user != null) {
-            Log.d(TAG, "✅ UI Updated - User signed in: ${user.displayName}")
+            Log.d(TAG, "UI Updated - User signed in: ${user.displayName}")
             // You can update UI elements here if needed
             // e.g., show user profile, hide sign-in button, etc.
         } else {
-            Log.d(TAG, "ℹ️ UI Updated - User signed out")
+            Log.d(TAG, "UI Updated - User signed out")
             // Show sign-in button, hide profile, etc.
         }
     }

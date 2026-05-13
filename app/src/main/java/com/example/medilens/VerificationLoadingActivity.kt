@@ -266,7 +266,7 @@ class VerificationLoadingActivity : AppCompatActivity() {
 
             if (all.isEmpty()) return ApiResult(noDetection = true)
 
-            Log.d(TAG, "✅ Detected: $bestName @ ${(bestConf * 100).toInt()}% | all=$all")
+            Log.d(TAG, "Detected: $bestName @ ${(bestConf * 100).toInt()}% | all=$all")
 
             ApiResult(
                 pillName      = bestName,

@@ -47,9 +47,9 @@ class PillDetector(private val context: Context) {
                 numThreads = 4
             }
             interpreter = Interpreter(modelBuffer, options)
-            Log.d(TAG, "✅ TFLite model loaded successfully")
+            Log.d(TAG, "TFLite model loaded successfully")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to load TFLite model: ${e.message}", e)
+            Log.e(TAG, "Failed to load TFLite model: ${e.message}", e)
             throw RuntimeException("Could not load pill_detector.tflite from assets: ${e.message}")
         }
     }

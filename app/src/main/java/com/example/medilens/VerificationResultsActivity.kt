@@ -126,7 +126,7 @@ class VerificationResultsActivity : AppCompatActivity() {
                         drawBoundingBoxes(it, detectedPills, emptyList(), roboflowW, roboflowH)
                     }
                     showValidResult(pillName, confidence, pillCount,
-                        "No prescription linked — pill detected and accepted.")
+                        "No prescription linked, pill detected and accepted.")
                 }
 
                 else -> {
@@ -143,7 +143,7 @@ class VerificationResultsActivity : AppCompatActivity() {
         btnFinish.setOnClickListener {
             // Pass detected pill names so only matched prescriptions are marked done
             markTaskAsCompleted(onlyDetected = allDetected)
-            Toast.makeText(this, "✅ Medication logged!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Medication logged!", Toast.LENGTH_SHORT).show()
             startActivity(Intent(this, HomeActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             })
@@ -359,7 +359,7 @@ class VerificationResultsActivity : AppCompatActivity() {
         btnFinish.text = "Finish"
         ivStatusIcon.setImageResource(R.drawable.ic_success)
         ivStatusIcon.setColorFilter(Color.parseColor("#4CAF50"))
-        tvStatusTitle.text = "Medication valid! ✅"
+        tvStatusTitle.text = "Medication valid!"
         tvStatusTitle.setTextColor(Color.parseColor("#4CAF50"))
         tvStatusDescription.text =
             "Detected: ${pillName.replaceFirstChar { it.uppercase() }}\n" +
@@ -461,9 +461,9 @@ class VerificationResultsActivity : AppCompatActivity() {
 
                     val extraStr = extraList.joinToString(", ")
                     tvStatusDescription.text =
-                        "Your required medicines are all present ✅\n\n" +
+                        "Your required medicines are all present\n\n" +
                                 "Extra detected: $extraStr\n\n" +
-                                "❌ Red boxes = extra/unexpected pills — do NOT take these\n\n" +
+                                "Red boxes = extra/unexpected pills, do NOT take these\n\n" +
                                 "Remove the extra pills and then tap Finish."
 
                     speak(
@@ -486,7 +486,7 @@ class VerificationResultsActivity : AppCompatActivity() {
                     btnFinish.text = "Finish"
                     ivStatusIcon.setImageResource(R.drawable.ic_error)
                     ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
-                    tvStatusTitle.text = "Missing medicines! ❌"
+                    tvStatusTitle.text = "Missing medicines!"
                     tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
 
                     val friendlyMissing = missingList.joinToString(", ") { getTtsFriendlyMedicineName(it) }
@@ -515,7 +515,7 @@ class VerificationResultsActivity : AppCompatActivity() {
                     btnFinish.text = "Finish"
                     ivStatusIcon.setImageResource(R.drawable.ic_error)
                     ivStatusIcon.setColorFilter(Color.parseColor("#F44336"))
-                    tvStatusTitle.text = "Medication issue detected! ❌"
+                    tvStatusTitle.text = "Medication issue detected!"
                     tvStatusTitle.setTextColor(Color.parseColor("#F44336"))
 
                     val friendlyMissing = missingList.joinToString(", ") { getTtsFriendlyMedicineName(it) }
@@ -523,7 +523,7 @@ class VerificationResultsActivity : AppCompatActivity() {
                     tvStatusDescription.text =
                         "Missing: $friendlyMissing\n\n" +
                                 "Extra detected: $friendlyExtra\n\n" +
-                                "❌ Red boxes = wrong/extra pills — do NOT take these\n\n" +
+                                "Red boxes = wrong/extra pills, do NOT take these\n\n" +
                                 "Please fix your medication and retake the photo."
 
                     speak(

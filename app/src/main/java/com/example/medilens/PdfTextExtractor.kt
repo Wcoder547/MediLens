@@ -19,7 +19,7 @@ object PdfTextExtractor {
 
     fun extract(context: Context, uri: Uri): String {
         val stream = context.contentResolver.openInputStream(uri)
-            ?: throw Exception("Cannot open PDF file — check file permissions")
+            ?: throw Exception("Cannot open PDF file, check file permissions")
 
         return stream.use { inputStream ->
             val document = try {
@@ -44,7 +44,7 @@ object PdfTextExtractor {
                 if (text.isBlank()) {
                     throw Exception(
                         "PDF contains no extractable text. " +
-                                "It may be a scanned image — please upload as an image file instead."
+                                "It may be a scanned image, please upload as an image file instead."
                     )
                 }
 

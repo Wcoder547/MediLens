@@ -9,22 +9,12 @@ import java.util.zip.ZipInputStream
 
 /**
  * Stage 2C — extracts text from Word files (.docx and .doc).
- *
- * NO external dependencies — uses only Android built-in APIs:
- *   - ZipInputStream  (docx is just a ZIP)
- *   - XmlPullParser   (reads word/document.xml inside the ZIP)
- *
- * Works on minSdk 24+.
- *
- * .doc (old binary format) is not supported by this approach.
- * If user uploads a .doc, we show a clear error asking them to
- * save as .docx or upload as PDF/image instead.
  */
 object WordTextExtractor {
 
     fun extract(context: Context, uri: Uri, mimeType: String): String {
         val stream = context.contentResolver.openInputStream(uri)
-            ?: throw Exception("Cannot open Word file — check file permissions")
+            ?: throw Exception("Cannot open Word file, check file permissions")
 
         return stream.use { inputStream ->
             if (isDocx(mimeType, uri)) {
@@ -72,7 +62,7 @@ object WordTextExtractor {
         return sb.toString().trim().also {
             if (it.isBlank()) throw Exception(
                 "Word document contains no readable text. " +
-                        "It may be image-only — please upload as an image file instead."
+                        "It may be image-only, please upload as an image file instead."
             )
         }
     }

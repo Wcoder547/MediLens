@@ -81,7 +81,7 @@ object DonutApiClient {
         val stream   = context.contentResolver.openInputStream(uri)
             ?: throw Exception("Cannot open image file")
         val original = BitmapFactory.decodeStream(stream)
-            ?: throw Exception("Cannot decode image — unsupported format")
+            ?: throw Exception("Cannot decode image, unsupported format")
         stream.close()
 
         val w = original.width
